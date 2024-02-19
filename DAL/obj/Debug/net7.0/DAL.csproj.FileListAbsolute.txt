@@ -12,3 +12,4 @@ C:\Users\pca96\Desktop\PROJECT\.NET MVC\DAL\obj\Debug\net7.0\refint\DAL.dll
 C:\Users\pca96\Desktop\PROJECT\.NET MVC\DAL\obj\Debug\net7.0\DAL.pdb
 C:\Users\pca96\Desktop\PROJECT\.NET MVC\DAL\obj\Debug\net7.0\DAL.genruntimeconfig.cache
 C:\Users\pca96\Desktop\PROJECT\.NET MVC\DAL\obj\Debug\net7.0\ref\DAL.dll
+C:\Users\pca96\Desktop\PROJECT\.NET MVC\DAL\obj\Debug\net7.0\DAL.sourcelink.json

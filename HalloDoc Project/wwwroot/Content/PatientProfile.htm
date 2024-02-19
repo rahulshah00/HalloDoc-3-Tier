@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css" />
+    <script src="/js/script.js"></script>
+   <style>
+       
+   </style>
+</head>
+<body>
+    <nav class="navbar ps-3  d-flex border-1 rounded ">
+
+        <div class="">
+            <a href="/">
+                <img src="/SRS Screen Shorts/HalloDoc LOGO.png" height="80vh" />
+            </a>
+        </div>
+        <div class="d-flex  ">
+            <div class="p-2 my-auto">
+                <span>
+                    Welcome <b> </b>
+                </span>
+            </div>
+            <div class="p-2">
+                <button class="btn btn-outline-info" id="logout">
+                    Logout
+                </button>
+            </div>
+            <div class="p-2">
+                <button class="btn btn-outline-info " onclick="darkMode()" id="darkmode">
+                    <svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="20px" viewBox="0 0 24 24" width="24px" fill="#01bce9"><rect fill="none" height="24" width="24" /><path d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z" /></svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+    <hr class="m-0" />
+    <div class="formdiv  ">
+        <ul class=" ps-5 nav nav-tabs border-0 shadow" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <a class="nav-link tabs active" id="home-tab" href="/Home/PatientDashboard">Dashboard</a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link tabs" id="profile-tab" href="/Home/PatientProfile">Profile</a>
+            </li>
+        </ul>
+        
+        <div class="">
+            <main role="main" class="pb-3">
+                <!doctype html>
+<html lang="en" style="width:100%;">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.6.1.min.js"
+            integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
+    <link rel="stylesheet" href="/css/PatientProfileCSS.css" />
+</head>
+<body>
+
+
+    <div class="d-flex m-auto justify-content-between mx-5" style=" ">
+        <h2 class=" ">User Profile</h2>
+        <button class="btn btn-outline-info " onclick="history.back(-1)">
+            <img src="/SRS Screen Shorts/go-back-2.svg" width="20px" />  Back
+        </button>
+    </div>
+    <div class="shadow-lg" style="">
+        <h5>
+            General Information
+        </h5>
+        <div>
+            <div class="row">
+                <div class="col-11 mt-4 col-md-6 form-floating ">
+                    <input type="text" class="t  form-control" id="fname" disabled>
+                    <label for="fname" class="ms-2">First Name</label>
+                </div>
+                <div class="col-11 mt-4 col-md-6 form-floating ">
+                    <input type="text" class="t  form-control" id="lname" disabled>
+                    <label for="lname" class="ms-2">Last Name</label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-11 mt-4 col-md-6 form-floating ">
+                    <input type="date" class="t  form-control" id="Dates" disabled>
+                    <label for="Dates" class="ms-2">Date</label>
+                </div>
+            </div>
+        </div>
+        <h5 class="mt-4">
+            Contact Information
+        </h5>
+        <div class="row">
+            <div class="col-11 mt-4 col-md-2 form-floating ">
+                <div class="form-floating">
+                    <select class="form-select" id="floatingSelect" aria-label="Floating label select example" disabled>
+                        <option selected>Select</option>
+                        <option value="1">Email</option>
+                        <option value="2">Mobile</option>
+
+                    </select>
+                    <label for="floatingSelect">Type</label>
+                </div>
+            </div>
+            <div class="col-11 mt-4 col-md-4 form-floating ">
+                <input type="text" class="t form-control" id="lname" disabled>
+                <label for="lname" class="ms-2">Last Name</label>
+            </div>
+            <div class="col-11 mt-4 col-md-6 form-floating ">
+                <input type="email" class="t  form-control" id="email" disabled>
+                <label for="email" class="ms-2">E-mail</label>
+            </div>
+        </div>
+        <div class="row mt-4">
+            <h5>Patient Location</h5>
+        </div>
+        <div class="row ">
+            <div class="col-11 col-md-6 mt-4">
+                <div class="form-floating">
+                    <input type="text" class="t form-control" id="floatingEmail" disabled data-val="true" data-val-length="The field Street must be a string with a maximum length of 100." data-val-length-max="100" maxlength="100" name="Street" value="hi">
+                    <label for="floatingEmail">Street</label>
+                </div>
+
+            </div>
+            <div class="col-11 col-md-6 mt-4">
+                <div class="form-floating">
+                    <input type="text" class="t  form-control" id="floatingCity" disabled data-val="true" data-val-length="The field City must be a string with a maximum length of 100." data-val-length-max="100" maxlength="100" name="City" value="hi">
+                    <label for="floatingCity">City</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="row ">
+            <div class="col-11 col-md-6 mt-4">
+                <div class="form-floating">
+                    <input type="text" class="t  form-control" id="floatingState" disabled data-val="true" data-val-length="The field State must be a string with a maximum length of 100." data-val-length-max="100" maxlength="100" name="State" value="hi">
+                    <label for="floatingState">State</label>
+                </div>
+            </div>
+            <div class="col-11 col-md-4 mt-4">
+                <div class="form-floating">
+                    <input type="number" class="t  form-control" id="floatingZip" disabled data-val="true" data-val-length="The field Zipcode must be a string with a maximum length of 10." data-val-length-max="10" name="Zipcode" value="78"><input name="__Invariant" type="hidden" value="Zipcode" />
+                    <label for="floatingZip">Zip Code</label>
+                </div>
+            </div>
+            <div class=" mt-4 col-5 col-md-1 ">
+                <button class="btn btn-outline-info h-100 ">
+                    Map
+                </button>
+            </div>
+        </div>
+        <div class="mt-4 justify-content-end d-flex">
+            <button class="btn btn-info">
+                <label class="d-block">Edit</label>
+                <label class="d-none">Save</label>
+            </button>
+
+        </div>
+    </div>
+
+
+
+    <script>
+        // bind file-input-form click action to text-input-span
+        $('#text_input_span_id').click(function () {
+            $("#file_input_id").trigger('click');
+        })
+        // bind file-input-form click action to text-input-form
+        $('#text_input_id').click(function () {
+            $("#file_input_id").trigger('click');
+        })
+        // display file name in text-input-form
+        $("#file_input_id").change(function () {
+            $('#text_input_id').val(this.value.replace(/C:\\fakepath\\/i, ''))
+        })
+    </script>
+</body>
+</html> 
+            </main>
+        </div>
+
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+</body>
+</html>

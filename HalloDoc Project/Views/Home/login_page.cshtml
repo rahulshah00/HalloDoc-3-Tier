@@ -1,7 +1,6 @@
 @model Aspnetuser
 @{
     Layout="_login_and_forgotpassword";
-
 }
 <!doctype html>
 <html lang="en">
@@ -10,27 +9,25 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Bootstrap demo</title>
-
+    <link rel="stylesheet" href="~/css/login_page_css.css" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-    <style>
-        
-    </style>
+    
 </head>
 
 <body>
     
-        <div class="col-12">
+        
             <div class="background"></div>
-            <div class=" row justify-content-end align-top">
+            <div class=" row justify-content-end container-fluid align-top">
                 <div class="col-1 ">
-                    <button class="btn btn-outline-dark " onclick="darkMode()" type="button">
+                    <button class="btn btn-outline-info" onclick="darkMode()" type="button">
                         <img src="/SRS Screen Shorts/dark_mode_black_24dp.svg" class=" " alt="dark-mode-icon">
                     </button>
                 </div>
             </div>
-            <div class="row align-middle justify-content-center" >
-                <div class="col-lg-6 col-md-7  col-sm-8 col-9">
+            <div class="row align-middle container-fluid justify-content-center" >
+                <div class="container-fluid col-lg-6 col-md-7  col-sm-8 col-9">
                     <div class="row">
                         <img src="/SRS Screen Shorts/HalloDoc LOGO.png" class="img-fluid " alt="logo here">
                     </div>
@@ -38,7 +35,7 @@
                         <div style="font-size:45px;">Login To Your Account</div>
                     </div>
                     <form method="post" >
-                        <div class="row">
+                        <div class="row mt-3">
                             <div class=" d-flex align-items-center form-control form-floating mb-3 p-1">
                                 <input type="text" asp-for="Username" name="username" class="form-control input_field" id="floatingInput" placeholder=""
                                     style="border: none;">
@@ -63,29 +60,40 @@
                             </div>
                         </div>
                     
-                    <div class="row mx-1 mb-3">
-                        <button type="submit" class="button bg-info border-0 p-2 ">
+                    <div class="mb-3 justify-content-center d-flex">
+                        <button type="submit" class=" btn px-5 button bg-info border-0 p-2 ">
                             <span style="color:white">Log-In</span>
                         </button>
                     </div>
                 </form>
                     <div class="row d-flex">
-                        <a href="/Home/forgot_password_page" class="d-flex justify-content-center"
+                        <a href="/Home/forgot_password_page" class="forgot d-flex justify-content-center"
                             style="color:rgb(0, 183, 255)">
                             Forgot Password?
                         </a>
                     </div>
                 </div>
             </div>
-            <div class="d-flex justify-content-center " >
+            @* <div class="d-flex  fixed-bottom  justify-content-center">
                 
-                <a href="#" class="  text-muted text-decoration-none">Terms & Conditions</a>
+                <a href="#" class="text-muted text-decoration-none">Terms & Conditions  </a>
                 <span class="text-muted mx-1">|</span>
-                <a href="#" class="text-muted text-decoration-none">Privacy Policy</a>
-            </div>
+                <a href="#" class="text-muted text-decoration-none">  Privacy Policy</a>
+            </div> *@
+        <div class="row align-items-center justify-content-center">
+
+            <footer class="py-5  position-fixed bottom-0">
+
+                <div class="justify-content-center d-flex align-items-end">
+                    <a href="" class="text-decoration-none"><span class=" text-muted">Terms of Conditions</span></a>
+                    <span class="px-2 text-muted " style="color: grey;">|</span>
+                    <a href="" class="text-decoration-none "><span class="text-muted">Privacy Policy</span></a>
+                </div>
+
+            </footer>
         </div>
-    
-    
+        
+        
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
         crossorigin="anonymous"></script>

@@ -10,6 +10,7 @@ using System.Web;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Authentication;
 using System.Net.Cache;
+using System.IO.Compression;
 namespace HalloDoc_Project.Controllers
 {
     public class HomeController : Controller
@@ -39,6 +40,11 @@ namespace HalloDoc_Project.Controllers
         {
             return View();
         }
+        public IActionResult SelectedDownload()
+        {
+            return View();
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult create_patient_request(PatientModel pm)
@@ -210,11 +216,47 @@ namespace HalloDoc_Project.Controllers
         }
         public IActionResult PatientProfile()
         {
+            
             var email = HttpContext.Session.GetString("Email");
             User v = _context.Users.FirstOrDefault(dt => dt.Email == email);
-            return View(v);
+            PatientProfileViewModel ppm = new() {
+                email = v.Email,
+                FirstName = v.Firstname,
+                LastName = v.Lastname,
+                PhoneNo = v.Mobile,
+                street = v.Street,
+                state = v.State,
+                city = v.City,
+                zipcode = v.Zipcode,
+                userid = v.Userid
+            };
+            return View(ppm);
         }
-        public IActionResult login_page()
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult editprofile(PatientProfileViewModel ppm)
+        {
+            //string phoneNumber = "+" + /*pm.CountryCode*/ + '-' + pm.Phone;
+            HttpContext.Session.GetString("Email");
+            User dbUser = _context.Users.FirstOrDefault(u => u.Email == ppm.email);
+            dbUser.Firstname = ppm.FirstName;
+            dbUser.Lastname = ppm.LastName;
+            dbUser.Intdate = ppm.Date.Day;
+            dbUser.Strmonth = ppm.Date.Month.ToString();
+            dbUser.Intyear = ppm.Date.Year;
+            dbUser.Mobile = ppm.PhoneNo;
+            dbUser.Street = ppm.street;
+            dbUser.City = ppm.city;
+            dbUser.State = ppm.state;
+            dbUser.Zipcode = ppm.zipcode;
+
+            _context.Update(dbUser);
+            _context.SaveChanges();
+            TempData["loginUserId"] = dbUser.Userid;
+            return RedirectToAction("PatientProfile");
+        }
+        public IActionResult login_page()   
         {
             return View();
         }
@@ -265,10 +307,25 @@ namespace HalloDoc_Project.Controllers
 
             vm.ConfirmationNo = request.Confirmationnumber;
             vm.RequestID = requestid;
-            vm.Username = user.Firstname + user.Lastname;
+            vm.Username = user.Firstname+" " + user.Lastname;
             vm.Requestwisefiles = files;
 
             return View(vm);
+        }
+        [HttpPost]
+        public IActionResult ViewDocuments(ViewDocumentsViewModel vm)
+        {
+            InsertRequestWiseFile(vm.File);
+            Requestwisefile rwf = new()
+            {
+                Requestid = vm.RequestID,
+                Filename = vm.File.FileName,
+                Createddate = DateTime.Now,
+            };
+            _context.Requestwisefiles.Add(rwf);
+            _context.SaveChanges();
+
+            return ViewDocuments(vm.RequestID);
         }
         public IActionResult Business_Info()
         {
@@ -464,6 +521,71 @@ namespace HalloDoc_Project.Controllers
         {
 
             return View();
+        }
+        public IActionResult DownLoadAll(int requestid)
+        {
+            var zipName = $"TestFiles-{DateTime.Now.ToString("yyyy_MM_dd-HH_mm_ss")}.zip";
+            using (MemoryStream ms = new MemoryStream())
+            {
+                //required: using System.IO.Compression;  
+                using (var zip = new ZipArchive(ms, ZipArchiveMode.Create, true))
+                {
+                    //QUery the Products table and get all image content  
+                    _context.Requests.ToList().ForEach(file =>
+                    {
+                        //var entry = zip.CreateEntry(file.);
+                        //using (var fileStream = new MemoryStream(file.ProImageContent))
+                        //using (var entryStream = entry.Open())
+                        //{
+                        //    fileStream.CopyTo(entryStream);
+                        //}
+                    });
+                }
+                return File(ms.ToArray(), "application/zip", zipName);
+            }
+        }
+        public async Task<IActionResult> DownloadAllFiles(int requestId)
+        {
+            try
+            {
+                // Fetch all document details for the given request:
+                var documentDetails = _context.Requestwisefiles.Where(m => m.Requestid == requestId).ToList();
+
+                if (documentDetails == null || documentDetails.Count == 0)
+                {
+                    return NotFound("No documents found for download");
+                }
+
+                // Create a unique zip file name
+                var zipFileName = $"Documents_{DateTime.Now:yyyyMMddHHmmss}.zip";
+                var zipFilePath = Path.Combine(_environment.WebRootPath, "DownloadableZips", zipFileName);
+
+                // Create the directory if it doesn't exist
+                var zipDirectory = Path.GetDirectoryName(zipFilePath);
+                if (!Directory.Exists(zipDirectory))
+                {
+                    Directory.CreateDirectory(zipDirectory);
+                }
+
+                // Create a new zip archive
+                using (var zipArchive = ZipFile.Open(zipFilePath, ZipArchiveMode.Create))
+                {
+                    // Add each document to the zip archive
+                    foreach (var document in documentDetails)
+                    {
+                        var documentPath = Path.Combine(_environment.WebRootPath, "Content", document.Filename);
+                        zipArchive.CreateEntryFromFile(documentPath, document.Filename);
+                    }
+                }
+
+                // Return the zip file for download
+                var zipFileBytes = await System.IO.File.ReadAllBytesAsync(zipFilePath);
+                return File(zipFileBytes, "application/zip", zipFileName);
+            }
+            catch
+            {
+                return BadRequest("Error downloading files");
+            }
         }
 
         public IActionResult logout()

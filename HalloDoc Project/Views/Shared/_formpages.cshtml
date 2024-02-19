@@ -4,6 +4,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - HalloDoc_Project</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/HalloDoc_Project.styles.css" asp-append-version="true" />
@@ -16,9 +20,12 @@
             text-decoration:none;
             color:black;
         }
+        *{
+            font-family:Poppins;
+        }
     </style>
 </head>
-<body class="w-100">
+<body >
 
     <nav class="navbar navigationbar shadow rounded w-100">
         <div class="w-100 align-items-center" style="display:contents;">
@@ -39,7 +46,7 @@
         </div>
     </nav>
 
-    <div class="">
+    <div class="container-fluid">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
@@ -49,11 +56,11 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 
-    <div class="justify-content-center bg-dark py-3 row align-items-center">
-    <footer class="foot justify-content-center  d-flex">
-        <a href="#" class="anchor text-white">Terms & Conditions </a>
-        <span class="mx-3 text-white">|</span>
-        <a href="##" class="anchor text-white">Privacy Policy</a>
+    <div class="justify-content-center bg-dark py-3  ">
+    <footer class="foot justify-content-center container-fluid  align-items-center d-flex">
+        <a href="#" class="anchor text-white mt-2">Terms & Conditions </a>
+        <span class="mx-3 mt-1 text-white">|</span>
+        <a href="##" class="anchor text-white mt-2">Privacy Policy</a>
     </footer>
 </div>
         

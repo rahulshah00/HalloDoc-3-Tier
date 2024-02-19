@@ -1,6 +1,8 @@
 ﻿.shadow-lg {
     margin-top: 2vh;
     padding: 1vw 2vw 2vw 2vw;
+    
+            
 }
 .documents {
     margin-top: 5vh;
@@ -8,7 +10,10 @@
     margin-right: 15vw;
 }
 .btn-outline-info:hover {
-    color: white;
+    color: white!important;
+}
+.btn-info{
+    color:white!important;
 }
 [data-bs-theme="light"] .nav-link {
     color: black;
@@ -25,6 +30,7 @@
 #darkmode:hover svg {
     fill: white;
 }
+
 .iti {
     position: relative;
     height: 100%;

@@ -43,26 +43,26 @@
                         Check here for any file that you or the doctors of your subsequent requestors have attached for you to review.
                     </small>
                 </div>
-                <div class="mb-3">
-
-                    <input class="form-control" type="file" id="file_input_id" style="opacity:0;height:0;">
-
-                    <div class="input-group mb-3">
-                        <input type="text" id='text_input_id' class="form-control" placeholder="Select File"
-                               style="caret-color: transparent" autocomplete="off">
-
-                        <span class="input-group-text" id="text_input_span_id " style="background-color: #10bce9;">
+                <form method="post" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <input asp-for="RequestID" hidden />
+                        <input asp-for="File" class="form-control" type="file" id="file_input_id" style="opacity:0;height:0;">
+                        <div class="input-group mb-3">
+                            <input type="text" id='text_input_id' class="form-control" placeholder="Select File"
+                                   style="caret-color: transparent" autocomplete="off">
                             <div>
-
-                                <label for="text_input_id" class="ms-1 text-white">Upload</label>
+                                <button for="text_input_id" type="submit" class="ms-1 btn-info btn text-white">Upload</button>
                             </div>
-                        </span>
-
+                        </div>
                     </div>
-                </div>
+                </form>
+
                 <div class="downloads d-flex justify-content-between ">
                     <h4>Downloads</h4>
-                    <button class="btn btn-outline-info">Download All</button>
+                    <div>
+                        <button class="btn btn-outline-info" asp-controller="Home" asp-action="SelectedDownload" asp-route-requestId="@Model.RequestID">Download Selected</button>
+                        <a class="btn btn-outline-info" asp-route-requestId="@Model.RequestID" asp-controller="Home" asp-action="DownloadAllFiles">Download All</a>
+                    </div>
                 </div>
                 <div class="table-responsive">
                     <table class="mt-3 table">
@@ -76,7 +76,7 @@
                         <tbody class="">
                             <tr class="tr-info">
                                 <th scope="col">
-                                    <input type="checkbox" />
+                                    <input type="checkbox" id="SelectAll" />
                                 </th>
                                 <th scope="col"></th>
                                 <th scope="col">Uploader</th>
@@ -87,11 +87,11 @@
                             {
                                 <tr class="tr-info">
                                     <td>
-                                        <input type="checkbox"/>
+                                        <input type="checkbox" class="checkbox" />
                                     </td>
                                     <td>@Model.Requestwisefiles[i].Filename</td>
                                     <td>@Model.Username</td>
-                                    <td>@Model.Requestwisefiles[i].Createddate.ToString("MM dd,yyyy")</td>
+                                    <td>@Model.Requestwisefiles[i].Createddate.ToString("MMM dd,yyyy")</td>
                                     <td>
                                         <a href="/Content/@Model.Requestwisefiles[i].Filename" download>
 
@@ -138,9 +138,29 @@
             $('#text_input_id').val(this.value.replace(/C:\\fakepath\\/i, ''))
         })
     </script>
+    <script>
+        $(document).ready(function () {
+            $('#SelectAll').on('click', function () {
+                if (this.checked) {
+                    $('.checkbox').each(function () {
+                        this.checked = true;
+                    });
+                } else {
+                    $('.checkbox').each(function () {
+                        this.checked = false;
+                    });
+                }
+            });
 
-
-
-
-</body>
+            $('.checkbox').on('click', function () {
+                if ($('.checkbox:checked').length == $('.checkbox').length) {
+                    $('#select_all').prop('checked', true);
+                }
+                else {
+                    $('#select_all').prop('checked', false);
+                }
+            });
+        });
+    </script>
+    </body>
 </html>

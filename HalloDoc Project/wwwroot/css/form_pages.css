@@ -9,7 +9,9 @@
     margin: 0 auto;
     /* / color: #fff; / */
 }
-
+* {
+    font-family: Poppins;
+}
 #fileLoader {
     position: absolute;
     left: -9999px;
