@@ -11,16 +11,25 @@ using System.Security.Cryptography;
 using Microsoft.AspNetCore.Authentication;
 using System.Net.Cache;
 using System.IO.Compression;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using System.Net.Mail;
+using System.Net;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 namespace HalloDoc_Project.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _environment;
-        public HomeController(ApplicationDbContext context, IWebHostEnvironment environment)
+
+        private readonly IConfiguration _config;
+        public HomeController(ApplicationDbContext context, IWebHostEnvironment environment, IConfiguration config)
         {
             _context = context;
             _environment = environment;
+            _config = config;
         }
 
         public IActionResult Index()
@@ -188,20 +197,7 @@ namespace HalloDoc_Project.Controllers
 
 
         }
-        //public IActionResult PatientCheckEmail(string email)
-        //{
-        //    var existingUser = _context.Aspnetusers.FirstOrDefault(u => u.Email == email);
-        //    bool isValidEmail;
-        //    if (existingUser == null)
-        //    {
-        //        isValidEmail = false;
-        //    }
-        //    else
-        //    {
-        //        isValidEmail = true;
-        //    }
-        //    return Json(new { isValid = isValidEmail });
-        //}
+        
         [HttpPost]
         public JsonResult CheckEmail(string email)
         {
@@ -216,10 +212,11 @@ namespace HalloDoc_Project.Controllers
         }
         public IActionResult PatientProfile()
         {
-            
+
             var email = HttpContext.Session.GetString("Email");
             User v = _context.Users.FirstOrDefault(dt => dt.Email == email);
-            PatientProfileViewModel ppm = new() {
+            PatientProfileViewModel ppm = new()
+            {
                 email = v.Email,
                 FirstName = v.Firstname,
                 LastName = v.Lastname,
@@ -231,6 +228,117 @@ namespace HalloDoc_Project.Controllers
                 userid = v.Userid
             };
             return View(ppm);
+        }
+
+        //[HttpPost]
+        //public ActionResult RequestReset(string email)
+        //{
+        //    // 1. Generate a JWT token containing the user's email address and an expiry date
+            
+        //    // 2. Encode the token as a URL-safe string
+        //    //var resetLink = Url.Action("ResetPassword", "PasswordReset", new { token = jwtToken }, Request.Url.Scheme);
+
+        //    // 3. Send the token to the user in a password reset email
+        //    // (You need to implement email sending logic here)
+
+        //    //return Content("Reset link sent to email: " + resetLink);
+        //}
+
+        [HttpGet]
+        public ActionResult ResetPassword(string token)
+        {
+            // 4. In the MVC controller, create an action method to handle the password reset request
+            try
+            {
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var key = Encoding.ASCII.GetBytes(_config["Jwt:Key"]);
+                // 5. Verify the JWT token and allow the user to reset the password if the token is valid
+                tokenHandler.ValidateToken(token, new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = true,
+                    ValidateLifetime=true,
+                    ValidateAudience = false,
+                    ValidIssuer = _config["Jwt:Issuer"],
+                    ClockSkew = TimeSpan.Zero
+                }, out SecurityToken validatedToken);
+
+                var jwtToken = (JwtSecurityToken)validatedToken;
+                var email = jwtToken.Claims.First(x => x.Type == "email").Value;
+
+                ResetPasswordViewModel rpvm = new ResetPasswordViewModel()
+                {
+                    email = email
+                };
+
+                return View(rpvm);
+            }
+            catch (Exception ex)
+            {
+                return Content("Invalid token");
+            }
+        }
+
+        [HttpPost]
+        public IActionResult ResetPassword(ResetPasswordViewModel rpvm)
+        {
+
+            Aspnetuser aspnetuser=_context.Aspnetusers.FirstOrDefault(u=>u.Email==rpvm.email);
+            if(rpvm.password==rpvm.confirmpassword)
+            {
+                aspnetuser.Passwordhash = GenerateSHA256(rpvm.password);
+                aspnetuser.Modifieddate = DateTime.Now;
+                _context.Aspnetusers.Update(aspnetuser);
+                _context.SaveChanges();
+                return View("login_page");
+            }
+            else
+            {
+                return View("Error");
+            }
+        }
+        [HttpPost]
+        [AutoValidateAntiforgeryToken]
+        public IActionResult forgot_password_page(ForgotPasswordViewModel fvm)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(_config["Jwt:Key"]);
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new[] { new Claim("email", fvm.email) }),
+                Expires = DateTime.UtcNow.AddHours(24), 
+                Issuer = _config["Jwt:Issuer"],
+                //Audience = _audience,
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key)
+    , SecurityAlgorithms.HmacSha256Signature)
+            };
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var jwtToken = tokenHandler.WriteToken(token);
+
+            var resetLink = Url.Action("ResetPassword", "Home", new { token = jwtToken }, Request.Scheme);
+
+            //----------------------------------
+
+            var smtpClient = new SmtpClient("smtp.office365.com")
+            {
+                Port = 587,
+                Credentials = new NetworkCredential("tatva.dotnet.rahulshah@outlook.com", "@08RahulTatvA"),
+                EnableSsl = true,
+                DeliveryMethod = SmtpDeliveryMethod.Network,
+                UseDefaultCredentials = false
+            };
+            //smtpClient.Send("tatva.dotnet.rahulshah@outlook.com", "rahul0810shah@gmail.com", "This is a trial email for smtpClient.", "this is token ->" + resetLink);
+            var mailMessage = new MailMessage
+            {
+                From = new MailAddress("tatva.dotnet.rahulshah@outlook.com"),
+                Subject = "Subject",
+                Body = "<h1>Hello , Good morning!!</h1><a href=\"" + resetLink + "\" >Reset your password</a>",
+                IsBodyHtml = true
+            };
+            mailMessage.To.Add(fvm.email);
+            smtpClient.Send(mailMessage);
+            return RedirectToAction("login_page");
         }
 
         [HttpPost]
@@ -256,7 +364,7 @@ namespace HalloDoc_Project.Controllers
             TempData["loginUserId"] = dbUser.Userid;
             return RedirectToAction("PatientProfile");
         }
-        public IActionResult login_page()   
+        public IActionResult login_page()
         {
             return View();
         }
@@ -267,8 +375,9 @@ namespace HalloDoc_Project.Controllers
             var password = GenerateSHA256(demouser.Passwordhash);
             Aspnetuser v = _context.Aspnetusers.FirstOrDefault(dt => dt.Username == demouser.Username && dt.Passwordhash == password);
             if (v != null)
-            { 
+            {
                 HttpContext.Session.SetString("Email", v.Email);
+                
                 return RedirectToAction("PatientDashboard");
 
             }
@@ -299,15 +408,15 @@ namespace HalloDoc_Project.Controllers
         public IActionResult ViewDocuments(int requestid)
         {
             string? email = HttpContext.Session.GetString("Email");
-            User user = _context.Users.FirstOrDefault(u => u.Email==email);
-            Request request=_context.Requests.FirstOrDefault(v => v.Requestid==requestid);
-            List<Requestwisefile> files = _context.Requestwisefiles.Where(reqFiles => reqFiles.Requestid==requestid).ToList();
+            User user = _context.Users.FirstOrDefault(u => u.Email == email);
+            Request request = _context.Requests.FirstOrDefault(v => v.Requestid == requestid);
+            List<Requestwisefile> files = _context.Requestwisefiles.Where(reqFiles => reqFiles.Requestid == requestid).ToList();
 
-            ViewDocumentsViewModel vm=new ViewDocumentsViewModel();
+            ViewDocumentsViewModel vm = new ViewDocumentsViewModel();
 
             vm.ConfirmationNo = request.Confirmationnumber;
             vm.RequestID = requestid;
-            vm.Username = user.Firstname+" " + user.Lastname;
+            vm.Username = user.Firstname + " " + user.Lastname;
             vm.Requestwisefiles = files;
 
             return View(vm);
