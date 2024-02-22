@@ -576,7 +576,7 @@ namespace HalloDoc_Project.Controllers
             var email = HttpContext.Session.GetString("Email");
             User user = _context.Users.FirstOrDefault(u => u.Email == email);
             PatientDashboardViewModel pd = new PatientDashboardViewModel();
-            pd.Username = user.Firstname + " " + user.Lastname;
+            pd.Username = user.Firstname + " " + user.Lastname==null ? "" : user.Lastname;
             pd.Requests = _context.Requests.Where(req => req.Userid == user.Userid).ToList();
             List<int> documentCount = new List<int>();
             for (int i = 0; i < pd.Requests.Count; i++)

@@ -23,11 +23,6 @@ namespace DAL.ViewModels
         public IFormFile File{ get; set; }
         public string Password { get; set; }
         public string ConfirmPass{ get; set; }
-        //[DataType(DataType.Password)]
-        //public string? Password { get; set; }
-        //[DataType(DataType.Password)]
-        //[Compare("Password", ErrorMessage = "Password and Confirm Password do not match")]
-        //public string? ConfirmPass { get; set; }
-
+        
     }
 }
