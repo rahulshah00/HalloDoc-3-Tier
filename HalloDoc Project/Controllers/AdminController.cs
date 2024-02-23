@@ -23,27 +23,35 @@ namespace HalloDoc_Project.Controllers
         }
         public IActionResult AdminDashboard()
         {
-            
+
             var adminRequests = (from r in _context.Requests
                                  join rc in _context.Requestclients on r.Requestid equals rc.Requestid
                                  select new AdminRequestsViewModel
                                  {
-                                     Name = rc.Firstname+" "+rc.Lastname,
+                                     Name = rc.Firstname + " " + rc.Lastname,
                                      Requesteddate = r.Createddate,
-                                     Requestor=r.Firstname,
-                                     PhoneNo=rc.Phonenumber,
-                                     Address=rc.Address,
-                                     OtherPhoneNo=r.Phonenumber
+                                     Requestor = r.Firstname,
+                                     PhoneNo = rc.Phonenumber,
+                                     Address = rc.Address,
+                                     OtherPhoneNo = r.Phonenumber,
+                                     requestType = r.Requesttypeid
                                  }).ToList();
+
             AdminRequestsViewModel arvm = new AdminRequestsViewModel();
-            return View(arvm);
+            AdminDashboardViewModel advm = new()
+            {
+                adminRequests = adminRequests,
+                Username = arvm.Name
+            };
+
+            return View(advm);
         }
         public static string GetDOB(Requestclient reqcli)
         {
             string dob = reqcli.Intyear + "-" + reqcli.Strmonth + "-" + reqcli.Intdate;
             if (reqcli.Intyear == null || reqcli.Strmonth == null || reqcli.Intdate == null)
             {
-                return "";
+                return " ";
             }
 
             string dobdate = DateTime.Parse(dob).ToString("MMM dd, yyyy");
@@ -75,6 +83,6 @@ namespace HalloDoc_Project.Controllers
         {
             return View();
         }
-        
+
     }
 }

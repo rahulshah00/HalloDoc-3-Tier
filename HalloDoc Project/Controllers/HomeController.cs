@@ -551,8 +551,7 @@ namespace HalloDoc_Project.Controllers
             };
             _context.Requestclients.Add(rcl);
             _context.SaveChanges();
-            return RedirectToAction("PatientDashboard");
-
+            return RedirectToAction("login_page");
         }
 
         public static string GenerateSHA256(string input)

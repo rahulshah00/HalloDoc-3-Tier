@@ -278,7 +278,7 @@ public partial class ApplicationDbContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("requestconcierge_pkey");
 
-            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.Id).UseIdentityAlwaysColumn();
 
             entity.HasOne(d => d.Concierge).WithMany(p => p.Requestconcierges)
                 .OnDelete(DeleteBehavior.ClientSetNull)

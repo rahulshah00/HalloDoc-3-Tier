@@ -1,4 +1,5 @@
 ﻿@{
+    Layout = "_Layout";
 }
 <!doctype html>
 <html lang="en">
@@ -36,8 +37,8 @@
                 <img src="/SRS Screen Shorts/HalloDoc LOGO.png" class="img-fluid" style="min-width:200px" alt="">
             </div>
 
-            <div class="w-50 col-4 border d-flex align-items-center rounded m-5 ">
-                <button onclick="window.location.href='/Home/patient_submit_request_screen'" class="btno1 py-3 w-100 ">
+            <div class="w-50 col-4 border d-flex align-items-center  m-2 ">
+                <button onclick="window.location.href='/Home/patient_submit_request_screen'" class="btno1 py-3 rounded w-100 ">
                     SUBMIT A REQUEST
                 </button>
             </div>
@@ -47,7 +48,7 @@
                 </button>
             </div>
             <div class=" w-50 col-4 border rounded m-2 ">
-                <a asp-controller="Admin" asp-action="AdminDashboard" class="btn btn-warning btno3 py-3 w-100 px- rounded">
+                <a asp-controller="Admin" asp-action="AdminDashboard" class="btn btno3 py-3 w-100 px- rounded">
                     ADMIN DASHBOARD
                 </a>
             </div>

@@ -16,6 +16,6 @@ namespace DAL.ViewModels
         public string Address { get; set; }
         public string Notes { get; set; }
         public string OtherPhoneNo{ get; set; }
-        
+        public int requestType {  get; set; }
     }
 }
