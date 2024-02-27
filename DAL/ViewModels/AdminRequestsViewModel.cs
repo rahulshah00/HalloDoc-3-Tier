@@ -17,5 +17,10 @@ namespace DAL.ViewModels
         public string Notes { get; set; }
         public string OtherPhoneNo{ get; set; }
         public int requestType {  get; set; }
+        public int status { get; set; }
+        public string chatWith { get; set; }
+        public string physicianName { get; set; }
+        public DateOnly servicedate { get; set; }
+        public string region { get; set; }
     }
 }

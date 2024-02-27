@@ -1,3 +1,5 @@
+using BAL.Interfaces;
+using BAL.Repository;
 using DAL.DataContext;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -9,7 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>();
-
+builder.Services.AddScoped<IPatient_Request, Patient_RequestRepo>();
 //For Creating a session
 builder.Services.AddSession(options =>
 {

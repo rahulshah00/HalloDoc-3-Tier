@@ -18,7 +18,6 @@
     color: white;
     font-size: 25px;
     border: none;
-    
 }
 
 .btno2 {
@@ -27,14 +26,16 @@
     font-size: 25px;
     border: none;
 }
+
 .btno3 {
-    background-color:lightskyblue;
+    background-color: #20A7DB;
     color: black;
     font-size: 25px;
     border: none;
-    font-weight:600px;
+    font-weight: 600px;
 }
-.btno3:hover{
-    background-color:lightskyblue;
-    color:black;
-}
+
+    .btno3:hover {
+        background-color: lightskyblue;
+        color: black;
+    }

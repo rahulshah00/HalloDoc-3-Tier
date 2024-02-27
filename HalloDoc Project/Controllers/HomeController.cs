@@ -17,19 +17,21 @@ using System.Net;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using BAL.Interfaces;
 namespace HalloDoc_Project.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _environment;
-
         private readonly IConfiguration _config;
-        public HomeController(ApplicationDbContext context, IWebHostEnvironment environment, IConfiguration config)
+        private readonly IPatient_Request patient_Request;
+        public HomeController(ApplicationDbContext context, IWebHostEnvironment environment, IConfiguration config,IPatient_Request request)
         {
             _context = context;
             _environment = environment;
             _config = config;
+            patient_Request = request;
         }
 
         public IActionResult Index()
@@ -62,6 +64,9 @@ namespace HalloDoc_Project.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult create_patient_request(PatientModel pm)
         {
+            string path = _environment.WebRootPath;
+
+            patient_Request.trial(pm, path);
             if (pm.Password != null)
             {
                 //var newvm=new PatientModel();
@@ -201,7 +206,7 @@ namespace HalloDoc_Project.Controllers
 
 
         }
-        
+
         [HttpPost]
         public JsonResult CheckEmail(string email)
         {
@@ -234,20 +239,6 @@ namespace HalloDoc_Project.Controllers
             return View(ppm);
         }
 
-        //[HttpPost]
-        //public ActionResult RequestReset(string email)
-        //{
-        //    // 1. Generate a JWT token containing the user's email address and an expiry date
-            
-        //    // 2. Encode the token as a URL-safe string
-        //    //var resetLink = Url.Action("ResetPassword", "PasswordReset", new { token = jwtToken }, Request.Url.Scheme);
-
-        //    // 3. Send the token to the user in a password reset email
-        //    // (You need to implement email sending logic here)
-
-        //    //return Content("Reset link sent to email: " + resetLink);
-        //}
-
         [HttpGet]
         public ActionResult ResetPassword(string token)
         {
@@ -262,7 +253,7 @@ namespace HalloDoc_Project.Controllers
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(key),
                     ValidateIssuer = true,
-                    ValidateLifetime=true,
+                    ValidateLifetime = true,
                     ValidateAudience = false,
                     ValidIssuer = _config["Jwt:Issuer"],
                     ClockSkew = TimeSpan.Zero
@@ -288,8 +279,8 @@ namespace HalloDoc_Project.Controllers
         public IActionResult ResetPassword(ResetPasswordViewModel rpvm)
         {
 
-            Aspnetuser aspnetuser=_context.Aspnetusers.FirstOrDefault(u=>u.Email==rpvm.email);
-            if(rpvm.password==rpvm.confirmpassword)
+            Aspnetuser aspnetuser = _context.Aspnetusers.FirstOrDefault(u => u.Email == rpvm.email);
+            if (rpvm.password == rpvm.confirmpassword)
             {
                 aspnetuser.Passwordhash = GenerateSHA256(rpvm.password);
                 aspnetuser.Modifieddate = DateTime.Now;
@@ -311,7 +302,7 @@ namespace HalloDoc_Project.Controllers
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new[] { new Claim("email", fvm.email) }),
-                Expires = DateTime.UtcNow.AddHours(24), 
+                Expires = DateTime.UtcNow.AddHours(24),
                 Issuer = _config["Jwt:Issuer"],
                 //Audience = _audience,
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key)
@@ -383,7 +374,6 @@ namespace HalloDoc_Project.Controllers
                 HttpContext.Session.SetString("Email", v.Email);
                 
                 return RedirectToAction("PatientDashboard");
-
             }
             return View();
         }
@@ -575,7 +565,7 @@ namespace HalloDoc_Project.Controllers
             var email = HttpContext.Session.GetString("Email");
             User user = _context.Users.FirstOrDefault(u => u.Email == email);
             PatientDashboardViewModel pd = new PatientDashboardViewModel();
-            pd.Username = user.Firstname + " " + user.Lastname==null ? "" : user.Lastname;
+            pd.Username = user.Firstname + " " + user.Lastname == null ? "" : user.Lastname;
             pd.Requests = _context.Requests.Where(req => req.Userid == user.Userid).ToList();
             List<int> documentCount = new List<int>();
             for (int i = 0; i < pd.Requests.Count; i++)

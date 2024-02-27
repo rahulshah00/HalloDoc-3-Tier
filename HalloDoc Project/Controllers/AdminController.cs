@@ -21,7 +21,7 @@ namespace HalloDoc_Project.Controllers
         {
             return View();
         }
-        public IActionResult AdminDashboard()
+        public IActionResult AdminDBView()
         {
 
             var adminRequests = (from r in _context.Requests
@@ -83,6 +83,177 @@ namespace HalloDoc_Project.Controllers
         {
             return View();
         }
+        public IActionResult AdminDashboard()
+        {
+
+
+
+            AdminRequestsViewModel arvm = new AdminRequestsViewModel();
+            AdminDashboardViewModel advm = new()
+            {
+                New = _context.Requests.Count(u => u.Status == 1),
+                active = _context.Requests.Count(u => u.Status == 4 || u.Status == 5),
+                pending = _context.Requests.Count(u => u.Status == 2),
+                conclude = _context.Requests.Count(u => u.Status == 6),
+                toclose = _context.Requests.Count(u => u.Status == 7 || u.Status == 3 || u.Status == 8),
+                unpaid = _context.Requests.Count(u => u.Status == 9),
+                //adminRequests = adminRequests,
+                Username = arvm.Name
+            };
+
+            return View(advm);
+        }
+        [HttpPost]
+        public IActionResult NewTable()
+        {
+            var adminRequests = (from r in _context.Requests
+                                 join rc in _context.Requestclients on r.Requestid equals rc.Requestid
+                                 select new AdminRequestsViewModel
+                                 {
+                                     Name = rc.Firstname + " " + rc.Lastname,
+                                     Requesteddate = r.Createddate,
+                                     Requestor = r.Firstname,
+                                     PhoneNo = rc.Phonenumber,
+                                     Address = rc.Address,
+                                     OtherPhoneNo = r.Phonenumber,
+                                     requestType = r.Requesttypeid,
+                                     status = r.Status
+                                 }).Where(x => x.status == 1).ToList();
+
+            AdminDashboardViewModel model = new AdminDashboardViewModel()
+            {
+                adminRequests = adminRequests,
+            };
+
+            return PartialView("NewTable", model);
+        }
+        [HttpPost]
+        public IActionResult ActiveTable()
+        {
+            var adminRequests = (from r in _context.Requests
+                                 join rc in _context.Requestclients on r.Requestid equals rc.Requestid
+                                 select new AdminRequestsViewModel
+                                 {
+                                     Name = rc.Firstname + " " + rc.Lastname,
+                                     Requestor = r.Firstname,
+                                     PhoneNo = rc.Phonenumber,
+                                     Address = rc.Address,
+                                     OtherPhoneNo = r.Phonenumber,
+                                     requestType = r.Requesttypeid,
+                                     status = r.Status,
+                                     physicianName = "Dr.XYZ",
+                                     servicedate = DateOnly.Parse("22-12-2022"),
+
+                                 }
+                                ).Where(x => x.status == 4 || x.status == 5).ToList();
+            AdminDashboardViewModel model = new AdminDashboardViewModel()
+            {
+                adminRequests = adminRequests,
+            };
+
+            return PartialView("ActiveTable", model);
+        }
+        [HttpPost]
+        public IActionResult PendingTable()
+        {
+            var adminRequests = (from r in _context.Requests
+                                 join rc in _context.Requestclients on r.Requestid equals rc.Requestid
+                                 select new AdminRequestsViewModel
+                                 {
+                                     Name = rc.Firstname + " " + rc.Lastname,
+                                     Requestor = r.Firstname,
+                                     PhoneNo = rc.Phonenumber,
+                                     Address = rc.Address,
+                                     OtherPhoneNo = r.Phonenumber,
+                                     requestType = r.Requesttypeid,
+                                     status = r.Status,
+                                     physicianName = "Dr.XYZ",
+                                     servicedate = DateOnly.Parse("22-12-2022")
+                                 }
+                                ).Where(x => x.status == 2).ToList();
+            AdminDashboardViewModel model = new AdminDashboardViewModel()
+            {
+                adminRequests = adminRequests,
+            };
+
+            return PartialView("PendingTable", model);
+        }
+        [HttpPost]
+        public IActionResult ConcludeTable()
+        {
+            var adminRequests = (from r in _context.Requests
+                                 join rc in _context.Requestclients on r.Requestid equals rc.Requestid
+                                 select new AdminRequestsViewModel
+                                 {
+                                     Name = rc.Firstname + " " + rc.Lastname,
+                                     Requestor = r.Firstname,
+                                     PhoneNo = rc.Phonenumber,
+                                     Address = rc.Address,
+                                     OtherPhoneNo = r.Phonenumber,
+                                     requestType = r.Requesttypeid,
+                                     status = r.Status,
+                                     physicianName = "Dr.XYZ",
+                                     servicedate = DateOnly.Parse("22-12-2022")
+                                 }
+                                ).Where(x => x.status == 6).ToList();
+            AdminDashboardViewModel model = new AdminDashboardViewModel()
+            {
+                adminRequests = adminRequests,
+            };
+
+            return PartialView("ConcludeTable", model);
+        }
+        [HttpPost]
+        public IActionResult ToCloseTable()
+        {
+            var adminRequests = (from r in _context.Requests
+                                 join rc in _context.Requestclients on r.Requestid equals rc.Requestid
+                                 select new AdminRequestsViewModel
+                                 {
+                                     Name = rc.Firstname + " " + rc.Lastname,
+                                     Requestor = r.Firstname,
+                                     PhoneNo = rc.Phonenumber,
+                                     Address = rc.Address,
+                                     OtherPhoneNo = r.Phonenumber,
+                                     requestType = r.Requesttypeid,
+                                     status = r.Status,
+                                     physicianName = "Dr.XYZ",
+                                     servicedate = DateOnly.Parse("22-12-2022")
+                                 }
+                                ).Where(x => x.status == 3 || x.status == 7 || x.status == 8).ToList();
+            AdminDashboardViewModel model = new AdminDashboardViewModel()
+            {
+                adminRequests = adminRequests,
+            };
+
+            return PartialView("ToCloseTable", model);
+        }
+        [HttpPost]
+        public IActionResult UnpaidTable()
+        {
+            var adminRequests = (from r in _context.Requests
+                                 join rc in _context.Requestclients on r.Requestid equals rc.Requestid
+                                 select new AdminRequestsViewModel
+                                 {
+                                     Name = rc.Firstname + " " + rc.Lastname,
+                                     Requestor = r.Firstname,
+                                     PhoneNo = rc.Phonenumber,
+                                     Address = rc.Address,
+                                     OtherPhoneNo = r.Phonenumber,
+                                     requestType = r.Requesttypeid,
+                                     status = r.Status,
+                                     physicianName = "Dr.XYZ",
+                                     servicedate = DateOnly.Parse("22-12-2022")
+                                 }
+                                ).Where(x => x.status == 9).ToList();
+            AdminDashboardViewModel model = new AdminDashboardViewModel()
+            {
+                adminRequests = adminRequests,
+            };
+
+            return PartialView("UnpaidTable", model);
+        }
+
 
     }
 }
