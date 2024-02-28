@@ -16,5 +16,6 @@ namespace DAL.ViewModels
         public int pending {  get; set; }
         public int active {  get; set; }
         public int toclose { get; set; }
+        
     }
 }

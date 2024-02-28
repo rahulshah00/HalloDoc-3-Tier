@@ -2,14 +2,12 @@
 using DAL.DataModels;
 using Microsoft.AspNetCore.Mvc;
 using DAL.DataContext;
-
 namespace HalloDoc_Project.Controllers
 {
     public class AdminController : Controller
     {
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _environment;
-
         private readonly IConfiguration _config;
         public AdminController(ApplicationDbContext context, IWebHostEnvironment environment, IConfiguration config)
         {
@@ -18,6 +16,15 @@ namespace HalloDoc_Project.Controllers
             _config = config;
         }
         public IActionResult Index()
+        {
+            return View();
+        }
+
+        public IActionResult ViewCase()
+        {
+            return View();
+        }
+        public IActionResult ViewNotes()
         {
             return View();
         }
@@ -253,6 +260,7 @@ namespace HalloDoc_Project.Controllers
 
             return PartialView("UnpaidTable", model);
         }
+        
 
 
     }

@@ -33,8 +33,8 @@
                 if (Model.adminRequests[i].requestType == 1)
                 {
                     <tr class="business-request-row">
-                        
-                        
+
+
                         <td>
                             <div class="d-flex align-items-center justify-content-between">
                                 <span>
@@ -55,10 +55,11 @@
                         <td>
                             Business @Model.adminRequests[i].Requestor
                         </td>
-<td>
+                        <td>
                             @Model.adminRequests[i].physicianName
                         </td>
-                        <td>@Model.adminRequests[i].servicedate</td>                        <td>
+                        <td>@Model.adminRequests[i].servicedate</td>
+                        <td>
                             <div class="white-border-btn px-2 py-1 align-items-center d-flex">
                                 <svg xmlns="http://www.w3.org/2000/svg" height="15px" viewBox="0 0 24 24" width="15px"
                                      fill="white">
@@ -149,7 +150,7 @@
                                 </div>
                             </div>
                         </td>
-                        <td></td>
+                        
                     </tr>
                 }
                 if (Model.adminRequests[i].requestType == 2)

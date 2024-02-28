@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -22,5 +23,6 @@ namespace DAL.ViewModels
         public string physicianName { get; set; }
         public DateOnly servicedate { get; set; }
         public string region { get; set; }
+        public int requestid {  get; set; }
     }
 }

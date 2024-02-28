@@ -66,14 +66,13 @@ namespace HalloDoc_Project.Controllers
         {
             string path = _environment.WebRootPath;
 
-            patient_Request.trial(pm, path);
             if (pm.Password != null)
             {
                 //var newvm=new PatientModel();
                 Aspnetuser user = new Aspnetuser();
-
-                string id = Guid.NewGuid().ToString();
-                user.Id = id;
+                Guid id = Guid.NewGuid();
+                
+                user.Id = id.ToString();
                 user.Email = pm.Email;
                 user.Passwordhash = GenerateSHA256(pm.Password);
                 user.Phonenumber = pm.PhoneNo;
@@ -95,7 +94,7 @@ namespace HalloDoc_Project.Controllers
                 user_obj.State = pm.State;
                 user_obj.Zipcode = pm.ZipCode;
                 user_obj.Createddate = DateTime.Now;
-                user_obj.Createdby = id;
+                user_obj.Createdby = id.ToString()  ;
                 //user_obj.Modifiedby = null;
                 _context.Users.Add(user_obj);
                 _context.SaveChanges();
@@ -111,7 +110,7 @@ namespace HalloDoc_Project.Controllers
                 request.Phonenumber = pm.PhoneNo;
                 request.Email = pm.Email;
                 request.Createddate = DateTime.Now;
-                request.Patientaccountid = id;
+                request.Patientaccountid = id.ToString()    ;
                 request.Status = 1;
                 request.Createduserid = user_obj.Userid;
                 _context.Requests.Add(request);
@@ -483,7 +482,7 @@ namespace HalloDoc_Project.Controllers
             };
             _context.Requestclients.Add(rc);
             _context.SaveChanges();
-            return RedirectToAction("PatientDashboard");
+            return RedirectToAction("submit_request_page");
         }
 
         public IActionResult Concierge_info()
@@ -541,7 +540,7 @@ namespace HalloDoc_Project.Controllers
             };
             _context.Requestclients.Add(rcl);
             _context.SaveChanges();
-            return RedirectToAction("login_page");
+            return RedirectToAction("submit_request_page");
         }
 
         public static string GenerateSHA256(string input)
@@ -616,7 +615,7 @@ namespace HalloDoc_Project.Controllers
             _context.Requestclients.Add(rcl);
             _context.SaveChanges();
 
-            return RedirectToAction("PatientDashboard");
+            return RedirectToAction("submit_request_page");
         }
 
         public IActionResult submit_request_page()

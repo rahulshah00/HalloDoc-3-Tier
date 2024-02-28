@@ -2,27 +2,21 @@
 <div class="mt-3">
     <table class="table">
         <colgroup>
-            <col span="1" style="width: 15%;">
+            <col span="1" style="width: 17%;">
             <col span="1" style="width: 8%;">
-            <col span="1" style="width: 8%;">
-            <col span="1" style="width: 8%;">
-            <col span="1" style="width: 8%;">
-            <col span="1" style="width: 12%;">
-            <col span="1" style="width: 19%;">
+            <col span="1" style="width: 9%;">
             <col span="1" style="width: 8%;">
             <col span="1" style="width: 12%;">
+            <col span="1" style="width: 9%;">
             <col span="1" style="width: 6%;">
         </colgroup>
         <thead class="table-head align-middle">
             <tr>
                 <th>Name</th>
-                <th>Date Of Birth</th>
-                <th>Requestor</th>
                 <th>Physician name</th>
                 <th>Date Of Service</th>
                 <th>Phone</th>
                 <th>Address</th>
-                <th>Notes</th>
                 <th>Chat With</th>
                 <th>Actions</th>
             </tr>
@@ -50,12 +44,11 @@
                             </div>
                         </td>
                         <td>
-                            @Model.adminRequests[i].DateOfBirth
+                            @Model.adminRequests[i].physicianName
                         </td>
                         <td>
-                            Business @Model.adminRequests[i].Requestor
+                            @Model.adminRequests[i].servicedate
                         </td>
-                        <td>@Model.adminRequests[i].Requesteddate</td>
                         <td>
                             <div class="white-border-btn px-2 py-1 align-items-center d-flex">
                                 <svg xmlns="http://www.w3.org/2000/svg" height="15px" viewBox="0 0 24 24" width="15px"
@@ -81,7 +74,6 @@
 
                         </td>
                         <td>@Model.adminRequests[i].Address</td>
-                        <td>-</td>
                         <td>
                             <div class="d-flex p-1 white-border-btn justify-content-center align-items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" height="15px" viewBox="0 0 24 24" width="15px"
@@ -147,7 +139,7 @@
                                 </div>
                             </div>
                         </td>
-                        <td></td>
+
                     </tr>
                 }
                 if (Model.adminRequests[i].requestType == 2)
@@ -168,12 +160,12 @@
                             </div>
                         </td>
                         <td>
-                            @Model.adminRequests[i].DateOfBirth
+                            @Model.adminRequests[i].physicianName
                         </td>
                         <td>
-                            Patient @Model.adminRequests[i].Requestor
+                            @Model.adminRequests[i].servicedate
                         </td>
-                        <td>@Model.adminRequests[i].Requesteddate</td>
+
                         <td>
                             <div class="white-border-btn px-2 py-1 align-items-center d-flex">
                                 <svg xmlns="http://www.w3.org/2000/svg" height="15px" viewBox="0 0 24 24" width="15px"
@@ -199,7 +191,7 @@
                             }
                         </td>
                         <td>@Model.adminRequests[i].Address</td>
-                        <td>-</td>
+
                         <td>
                             <div class="d-flex p-1 white-border-btn justify-content-center align-items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" height="15px" viewBox="0 0 24 24" width="15px"
@@ -284,13 +276,11 @@
                                 </div>
                             </div>
                         </td>
+
                         <td>
-                            @Model.adminRequests[i].DateOfBirth
+                            @Model.adminRequests[i].physicianName
                         </td>
-                        <td>
-                            Family/Friend @Model.adminRequests[i].Requestor
-                        </td>
-                        <td>@Model.adminRequests[i].Requesteddate</td>
+                        <td>@Model.adminRequests[i].servicedate</td>
                         <td>
                             <div class="white-border-btn px-2 py-1 align-items-center d-flex">
                                 <svg xmlns="http://www.w3.org/2000/svg" height="15px" viewBox="0 0 24 24" width="15px"
@@ -315,7 +305,7 @@
                             }
                         </td>
                         <td>@Model.adminRequests[i].Address</td>
-                        <td>-</td>
+
                         <td>
                             <div class="d-flex p-1 white-border-btn justify-content-center align-items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" height="15px" viewBox="0 0 24 24" width="15px"
@@ -386,7 +376,7 @@
                 if (Model.adminRequests[i].requestType == 4)
                 {
                     <tr class="concierge-request-row">
-                        <td></td>
+
                         <td>
                             <div class="d-flex align-items-center justify-content-between">
                                 <span>
@@ -402,12 +392,11 @@
                             </div>
                         </td>
                         <td>
-                            @Model.adminRequests[i].DateOfBirth
+                            @Model.adminRequests[i].physicianName
                         </td>
                         <td>
-                            Concierge @Model.adminRequests[i].Requestor
+                            @Model.adminRequests[i].servicedate
                         </td>
-                        <td>@Model.adminRequests[i].Requesteddate</td>
                         <td>
                             <div class="white-border-btn px-2 py-1 align-items-center d-flex">
                                 <svg xmlns="http://www.w3.org/2000/svg" height="15px" viewBox="0 0 24 24" width="15px"
@@ -432,7 +421,7 @@
                             }
                         </td>
                         <td>@Model.adminRequests[i].Address</td>
-                        <td>-</td>
+
                         <td>
                             <div class="d-flex p-1 white-border-btn justify-content-center align-items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" height="15px" viewBox="0 0 24 24" width="15px"
