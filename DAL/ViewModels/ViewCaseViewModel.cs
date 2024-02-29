@@ -18,5 +18,8 @@ namespace DAL.ViewModels
         public string rooms { get; set; }
         public string patientphone {  get; set; }
         public string patientemail {  get; set; }
+        public string confirmationNo {  get; set; }
+        public string businessNameOrAddress { get; set; }
+        public int requestID {  get; set; }
     }
 }

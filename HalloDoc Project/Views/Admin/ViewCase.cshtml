@@ -69,7 +69,7 @@
                       style="background-color: #60bb5d; border-radius: 30px;">Patient</span>
             </div>
 
-            <a asp-controller="Admin" asp-action="Dashboard" class="btn btn-outline-info shadow-none night-mode-btn d-flex align-items-center">
+            <a asp-controller="Admin" asp-action="AdminDashboard" class="btn btn-outline-info shadow-none night-mode-btn d-flex align-items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 -960 960 960">
                     <path d="m142-480 294 294q15 15 14.5 35T435-116q-15 15-35 15t-35-15L57-423q-12-12-18-27t-6-30q0-15 6-30t18-27l308-308q15-15 35.5-14.5T436-844q15 15 15 35t-15 35L142-480Z" />
                 </svg>
@@ -82,10 +82,10 @@
 
             <div class="shadow p-3 dashboard-card mt-4">
 
-                <h4>Patient Information </h4>
-                <span class="m-0 fw-normal" style="color:grey;">ConfirmationNumber</span>
-                <h4 class="text-info m-0">MKHOIFDSOIAH</h4>
-
+                <h4>Patient Information</h4>
+                <small class="fw-normal" style="color:grey;">Confirmation Number</small>
+                <h5 class="text-info m-0">@Model.confirmationNo</h5>
+                
 
                 <div class="row">
 
@@ -94,7 +94,7 @@
                         <div class="form-floating mt-3">
                             <textarea asp-for="patientnotes" style="height:100px" class="form-control" placeholder="Leave a comment here" disabled
                                       id="floatingTextarea2"></textarea>
-                            <label for="floatingTextarea2">Patient Notes</label>
+                            <label for="floatingTextarea2">@Model.patientnotes</label>
                         </div>
 
                     </div>
@@ -109,7 +109,7 @@
                         <div class="form-floating mt-3">
                             <input asp-for="patientfirstname" class="form-control" placeholder="Leave a comment here" disabled
                                    id="floatingTextarea2">
-                            <label for="floatingTextarea2">First Name</label>
+                            <label for="floatingTextarea2">@Model.patientfirstname</label>
                         </div>
                     </div>
 
@@ -117,7 +117,7 @@
                         <div class="form-floating mt-3">
                             <input asp-for="patientlastname" class="form-control" placeholder="Leave a comment here" disabled
                                    id="floatingTextarea2">
-                            <label for="floatingTextarea2">Last Name</label>
+                            <label for="floatingTextarea2">@Model.patientlastname</label>
                         </div>
                     </div>
 
@@ -132,7 +132,7 @@
 
                             <input asp-for="dob" class="form-control" placeholder="Leave a comment here" type="date"
                                    id="floatingTextarea2" disabled>
-                            <label for="floatingTextarea2">Date of Birth:</label>
+                            <label for="floatingTextarea2">@Model.dob</label>
 
                         </div>
 
@@ -148,13 +148,11 @@
                     </div>
 
                     <div class="col-1 mt-3">
-
                         <button type="button" class="btn btn-outline-info w-100 h-100" style="color: #10bce9;">
                             <svg xmlns="http://www.w3.org/2000/svg" height="24" fill="currentColor" viewBox="0 -960 960 960" width="24">
                                 <path d="M798-120q-125 0-247-54.5T329-329Q229-429 174.5-551T120-798q0-18 12-30t30-12h162q14 0 25 9.5t13 22.5l26 140q2 16-1 27t-11 19l-97 98q20 37 47.5 71.5T387-386q31 31 65 57.5t72 48.5l94-94q9-9 23.5-13.5T670-390l138 28q14 4 23 14.5t9 23.5v162q0 18-12 30t-30 12ZM241-600l66-66-17-94h-89q5 41 14 81t26 79Zm358 358q39 17 79.5 27t81.5 13v-88l-94-19-67 67ZM241-600Zm358 358Z" />
                             </svg>
                         </button>
-
                     </div>
 
                 </div>
@@ -166,7 +164,7 @@
 
                         <div class="form-floating mt-3">
                             <input type="text" class="form-control" id="floatingInputemail" placeholder="name@example.com" asp-for="patientemail" oninput="checkUser()" disabled />
-                            <label for="floatingInputemail">Email address</label>
+                            <label for="floatingInputemail">@Model.patientemail</label>
                         </div>
 
                     </div>
@@ -183,14 +181,14 @@
                 <div class="form-floating mt-3">
                     <input asp-for="region" class="form-control" placeholder="Leave a comment here" disabled
                            id="floatingTextarea2"></input>
-                    <label for="floatingTextarea2">Region</label>
+                    <label for="floatingTextarea2">@Model.region</label>
                 </div>
             </div>
 
             <div class="col-md-5 col-12">
                 <div class="form-floating mt-3">
                     <input asp-for="address" class="form-control" placeholder="Leave a comment here" disabled></input>
-                    <label for="floatingTextarea2">Name/Address</label>
+                    <label for="floatingTextarea2">@Model.businessNameOrAddress</label>
                 </div>
             </div>
 
@@ -208,7 +206,7 @@
 
                     <input asp-for="rooms" class="form-control" placeholder="Leave a comment here" disabled
                            id="floatingTextarea2">
-                    <label for="floatingTextarea2">Rooms(Optional)</label>
+                    <label for="floatingTextarea2">@Model.rooms</label>
 
                 </div>
 
@@ -222,11 +220,11 @@
                 Assign
             </button>
 
-            <a asp-controller="Admin" asp-action="ViewNotes" class="btn py-2 px-4 ms-3" style="background-color: #10bce9; color: white;">
+            <button asp-controller="Admin" asp-action="ViewNotes" class="btn py-2 px-4 ms-3" style="background-color: #10bce9; color: white;">
                 View Notes
-            </a>
+            </button>
 
-            <button id="cancelBtn" onclick="" type="reset" class="btn py-2 px-4 ms-3 bg-danger" style="background-color: #10bce9; color: white;">
+            <button id="cancelBtn"  type="reset" class="btn py-2 px-4 ms-3 bg-danger" style="background-color: #10bce9; color: white;">
                 Cancel
             </button>
 

@@ -22,17 +22,26 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
     <style>
-        *{
-            font-family:Poppins;
+        .validation {
+            font-size: small;
+            color: red;
+            font-weight:500;
         }
+
+        * {
+            font-family: Poppins;
+        }
+
         .patient-upload {
             border-radius: 5px;
             border: 1px solid #d1d1d1;
             display: flex;
         }
-        .btn-online-info:hover{
-            color:white;
+
+        .btn-online-info:hover {
+            color: white;
         }
+
         .file-upload {
             /* display: block; */
             margin: 0 auto;
@@ -90,16 +99,18 @@
             z-index: 5;
         }
 
-        .btn-outine-info:hover {
-            color: white;
+        .btn-online-info:hover 
+        {
+            color:white;
         }
-        .shadow-lg{
-            box-shadow:0px 0px 10px white;
+
+        .shadow-lg {
+            box-shadow: 0px 0px 10px white;
         }
     </style>
 </head>
 
-<body >
+<body>
     <div class="row justify-content-end">
         <div class="col-2">
             <button class="btn btn-outline-info backbtn mt-3" onclick="window.history.back(-1)" style="width:auto">
@@ -111,7 +122,7 @@
     </div>
     <br>
     <div class="row mb-4 d-flex justify-content-center ">
-        <div class="col-11 col-md-10 col-lg-9 shadow-lg" >
+        <div class="col-11 col-md-10 col-lg-9 shadow-lg">
             <form method="post" enctype="multipart/form-data">
                 <div class="row ">
                     <h5 for="" class="mt-4">Patient Information</h5>
@@ -122,12 +133,14 @@
                                   placeholder="Enter Brief Details Of Symptoms(Optional)" style="height: 15vh;" cols="20"
                                   rows="5"></textarea>
                         <label for="forfloatingtextarea" class="ms-2">Enter Brief Details Of Symptoms(Optional)</label>
+                        
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-11 mt-4 col-sm-6 form-floating ">
                         <input type="text" asp-for="FirstName" placeholder="First Name" class="t  form-control" id="fname">
                         <label for="fname" class="ms-2">First Name</label>
+                        <span class="validation" asp-validation-for="FirstName"></span>
                     </div>
                     <div class="col-11 col-sm-6 mt-4 form-floating  ">
                         <input type="text" asp-for="LastName" placeholder="Last Name" class="t form-control" id="lname">
@@ -138,6 +151,7 @@
                     <div class="col-11 col-sm-6  mt-4 form-floating">
                         <input type="date" asp-for="DateOfBirth" placeholder="Date Of Birth" class="t form-control" id="DOB">
                         <label for="DOB" class="ms-2">Date Of Birth</label>
+                        <span class="validation" asp-validation-for="DateOfBirth"></span>
                     </div>
                 </div>
                 <div class="row mt-4">
@@ -148,6 +162,7 @@
                         <div class="form-floating">
                             <input type="email" asp-for="Email" placeholder="Email" class=" t form-control" id="emailfloat">
                             <label for="emailfloat">Email</label>
+                            <span class="validation" asp-validation-for="Email"></span>
                         </div>
                     </div>
                     <div class="col-11 col-sm-6 mt-4 ">
@@ -155,6 +170,7 @@
 
                         <div class="form-floating ">
                             <input id="patient-phone" asp-for="PhoneNo" class="form-control" type="tel" name="phone1" />
+                            <span class="validation" asp-validation-for="PhoneNo"></span>
                         </div>
 
                     </div>
@@ -166,14 +182,14 @@
                         <div class="form-floating">
                             <input type="password" asp-for="Password" placeholder="Email" class=" t form-control" id="passwordfloat">
                             <label for="passwordfloat">Enter Password</label>
-                            <span asp-validation-for="Password" class="text-danger"></span>
+                            <span class="validation" asp-validation-for="Password" class="text-danger"></span>
                         </div>
                     </div>
                     <div class="col-11 col-sm-6 mt-4 ">
                         <div class="form-floating ">
                             <input id="confirmpass" asp-for="ConfirmPass" class="form-control" type="password" />
                             <label for="confirmpass">Confirm Password</label>
-                            <span asp-validation-for="ConfirmPass" class=""></span>
+                            <span class="validation" asp-validation-for="ConfirmPass" class=""></span>
                         </div>
                     </div>
                 </div>
@@ -185,6 +201,7 @@
                         <div class="form-floating">
                             <input type="text" asp-for="Street" class="t form-control" id="floatingEmail" placeholder="Street ">
                             <label for="floatingEmail">Street</label>
+                            <span class="validation" asp-validation-for="Street"></span>
                         </div>
 
                     </div>
@@ -192,6 +209,7 @@
                         <div class="form-floating">
                             <input type="text" asp-for="City" class="t  form-control" id="floatingCity" placeholder="City">
                             <label for="floatingCity">City</label>
+                            <span class="validation" asp-validation-for="City"></span>
                         </div>
                     </div>
                 </div>
@@ -201,12 +219,15 @@
                         <div class="form-floating">
                             <input type="text" asp-for="State" class="t  form-control" id="floatingState" placeholder="state">
                             <label for="floatingState">State</label>
+                            <span class="validation" asp-validation-for="State"></span>
+
                         </div>
                     </div>
                     <div class="col-11 col-sm-6 mt-4">
                         <div class="form-floating">
                             <input type="number" asp-for="ZipCode" class="t  form-control" id="floatingZip" placeholder="zip">
                             <label for="floatingZip">Zip Code</label>
+                            <span class="validation" asp-validation-for="ZipCode"></span>
                         </div>
                     </div>
                 </div>
@@ -215,6 +236,7 @@
                         <div class="form-floating">
                             <input type="text" asp-for="RoomSuite" class="t  form-control" id="floatingRoom" placeholder="Room">
                             <label for="floatingRoom">Room # / Suite (Optional)</label>
+                            <span class="validation" asp-validation-for="RoomSuite"></span>
                         </div>
                     </div>
                 </div>
@@ -239,11 +261,11 @@
                 </div>
                 <div class="row text-end">
                     <div class="">
-                        <button type="submit" class="m-2 btn  btn-info text-light">
-                            <span class="p-3">Submit</span>
+                        <button type="submit" class=" p-3 m-2 btn  btn-info text-light">
+                            Submit
                         </button>
-                        <button type="reset" class="m-2 btn btn-outline-info">
-                            <span class="p-3">Cancel</span>
+                        <button type="reset" class="p-3 m-2 btn btn-outline-info">
+                            Cancel
                         </button>
                     </div>
                 </div>
@@ -275,11 +297,10 @@
                         success: function (data) {
                             if (!data.exists) {
                                 $('#hiddendiv').show();
-                                
+
                             }
                             else {
                                 $('#hiddendiv').hide();
-
                             }
                         }
                     });

@@ -41,6 +41,12 @@ label[for="fileLoader"] {
     border: 2px solid #10bce9;
 }
 
+.validation{
+    font-size:12px;
+    color:red;
+    font-weight:500;
+}
+
 .t:focus-within + label {
     color: #10bce9 !important;
 }

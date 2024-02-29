@@ -20,17 +20,31 @@ namespace HalloDoc_Project.Controllers
             return View();
         }
 
-        public IActionResult ViewCase()
+        public IActionResult ViewCase(int requestid)
         {
-            return View();
+            Requestclient rc = _context.Requestclients.FirstOrDefault(x => x.Requestid == requestid);
+            ViewCaseViewModel vc = new()
+            {
+                requestID = rc.Requestid,
+                patientemail = rc.Email,
+                patientfirstname = rc.Firstname,
+                patientlastname = rc.Lastname,
+                patientnotes = rc.Notes,
+                patientphone = rc.Phonenumber,
+                address = rc.Address,
+                rooms = "N/A"
+            };
+
+            return View(vc);
         }
-        public IActionResult ViewNotes()
+
+        public IActionResult ViewNotes(int requestid)
         {
+            ViewCaseViewModel vn = new ViewCaseViewModel();
             return View();
         }
         public IActionResult AdminDBView()
         {
-
             var adminRequests = (from r in _context.Requests
                                  join rc in _context.Requestclients on r.Requestid equals rc.Requestid
                                  select new AdminRequestsViewModel
@@ -92,9 +106,6 @@ namespace HalloDoc_Project.Controllers
         }
         public IActionResult AdminDashboard()
         {
-
-
-
             AdminRequestsViewModel arvm = new AdminRequestsViewModel();
             AdminDashboardViewModel advm = new()
             {
@@ -117,6 +128,7 @@ namespace HalloDoc_Project.Controllers
                                  join rc in _context.Requestclients on r.Requestid equals rc.Requestid
                                  select new AdminRequestsViewModel
                                  {
+                                     requestid= r.Requestid,
                                      Name = rc.Firstname + " " + rc.Lastname,
                                      Requesteddate = r.Createddate,
                                      Requestor = r.Firstname,
@@ -257,11 +269,7 @@ namespace HalloDoc_Project.Controllers
             {
                 adminRequests = adminRequests,
             };
-
             return PartialView("UnpaidTable", model);
         }
-        
-
-
     }
 }

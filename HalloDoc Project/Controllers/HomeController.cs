@@ -26,7 +26,7 @@ namespace HalloDoc_Project.Controllers
         private readonly IWebHostEnvironment _environment;
         private readonly IConfiguration _config;
         private readonly IPatient_Request patient_Request;
-        public HomeController(ApplicationDbContext context, IWebHostEnvironment environment, IConfiguration config,IPatient_Request request)
+        public HomeController(ApplicationDbContext context, IWebHostEnvironment environment, IConfiguration config, IPatient_Request request)
         {
             _context = context;
             _environment = environment;
@@ -65,143 +65,148 @@ namespace HalloDoc_Project.Controllers
         public IActionResult create_patient_request(PatientModel pm)
         {
             string path = _environment.WebRootPath;
-
-            if (pm.Password != null)
+            if (ModelState.IsValid)
             {
-                //var newvm=new PatientModel();
-                Aspnetuser user = new Aspnetuser();
-                Guid id = Guid.NewGuid();
-                
-                user.Id = id.ToString();
-                user.Email = pm.Email;
-                user.Passwordhash = GenerateSHA256(pm.Password);
-                user.Phonenumber = pm.PhoneNo;
-                user.Username = pm.FirstName;
-                user.Createddate = DateTime.Now;
-                _context.Aspnetusers.Add(user);
-                _context.SaveChanges();
+                if (pm.Password != null)
+                {
+                    //var newvm=new PatientModel();
+                    Aspnetuser user = new Aspnetuser();
+                    Guid id = Guid.NewGuid();
 
-                //user.Modifieddate = DateTime.Now;
+                    user.Id = id.ToString();
+                    user.Email = pm.Email;
+                    user.Passwordhash = GenerateSHA256(pm.Password);
+                    user.Phonenumber = pm.PhoneNo;
+                    user.Username = pm.FirstName;
+                    user.Createddate = DateTime.Now;
+                    _context.Aspnetusers.Add(user);
+                    _context.SaveChanges();
 
-                User user_obj = new User();
-                user_obj.Aspnetuserid = user.Id;
-                user_obj.Firstname = pm.FirstName;
-                user_obj.Lastname = pm.LastName;
-                user_obj.Email = pm.Email;
-                user_obj.Mobile = pm.PhoneNo;
-                user_obj.Street = pm.Street;
-                user_obj.City = pm.City;
-                user_obj.State = pm.State;
-                user_obj.Zipcode = pm.ZipCode;
-                user_obj.Createddate = DateTime.Now;
-                user_obj.Createdby = id.ToString()  ;
-                //user_obj.Modifiedby = null;
-                _context.Users.Add(user_obj);
-                _context.SaveChanges();
+                    //user.Modifieddate = DateTime.Now;
+
+                    User user_obj = new User();
+                    user_obj.Aspnetuserid = user.Id;
+                    user_obj.Firstname = pm.FirstName;
+                    user_obj.Lastname = pm.LastName;
+                    user_obj.Email = pm.Email;
+                    user_obj.Mobile = pm.PhoneNo;
+                    user_obj.Street = pm.Street;
+                    user_obj.City = pm.City;
+                    user_obj.State = pm.State;
+                    user_obj.Zipcode = pm.ZipCode;
+                    user_obj.Createddate = DateTime.Now;
+                    user_obj.Createdby = id.ToString();
+                    //user_obj.Modifiedby = null;
+                    _context.Users.Add(user_obj);
+                    _context.SaveChanges();
 
 
 
-                Request request = new Request();
-                //change the fname, lname , and contact detials acc to the requestor
-                request.Requesttypeid = 2;
-                request.Userid = user_obj.Userid;
-                request.Firstname = pm.FirstName;
-                request.Lastname = pm.LastName;
-                request.Phonenumber = pm.PhoneNo;
-                request.Email = pm.Email;
-                request.Createddate = DateTime.Now;
-                request.Patientaccountid = id.ToString()    ;
-                request.Status = 1;
-                request.Createduserid = user_obj.Userid;
-                _context.Requests.Add(request);
-                _context.SaveChanges();
+                    Request request = new Request();
+                    //change the fname, lname , and contact detials acc to the requestor
+                    request.Requesttypeid = 2;
+                    request.Userid = user_obj.Userid;
+                    request.Firstname = pm.FirstName;
+                    request.Lastname = pm.LastName;
+                    request.Phonenumber = pm.PhoneNo;
+                    request.Email = pm.Email;
+                    request.Createddate = DateTime.Now;
+                    request.Patientaccountid = id.ToString();
+                    request.Status = 1;
+                    request.Createduserid = user_obj.Userid;
+                    _context.Requests.Add(request);
+                    _context.SaveChanges();
 
-                Requestclient rc = new Requestclient();
-                rc.Requestid = request.Requestid;
-                rc.Firstname = pm.FirstName;
-                rc.Lastname = pm.LastName;
-                rc.Phonenumber = pm.PhoneNo;
-                rc.Location = pm.City + pm.State;
-                rc.Email = pm.Email;
-                rc.Address = pm.RoomSuite + ", " + pm.Street + ", " + pm.City + ", " + pm.State + ", " + pm.ZipCode;
-                rc.Street = pm.Street;
-                rc.City = pm.City;
-                rc.State = pm.State;
-                rc.Zipcode = pm.ZipCode;
-                rc.Notes = pm.Symptoms;
+                    Requestclient rc = new Requestclient();
+                    rc.Requestid = request.Requestid;
+                    rc.Firstname = pm.FirstName;
+                    rc.Lastname = pm.LastName;
+                    rc.Phonenumber = pm.PhoneNo;
+                    rc.Location = pm.City + pm.State;
+                    rc.Email = pm.Email;
+                    rc.Address = pm.RoomSuite + ", " + pm.Street + ", " + pm.City + ", " + pm.State + ", " + pm.ZipCode;
+                    rc.Street = pm.Street;
+                    rc.City = pm.City;
+                    rc.State = pm.State;
+                    rc.Zipcode = pm.ZipCode;
+                    rc.Notes = pm.Symptoms;
 
-                _context.Requestclients.Add(rc);
-                _context.SaveChanges();
+                    _context.Requestclients.Add(rc);
+                    _context.SaveChanges();
 
-                if (pm.File != null)
+                    if (pm.File != null)
+                    {
+
+                        InsertRequestWiseFile(pm.File);
+                        Requestwisefile rwf = new()
+                        {
+                            Requestid = request.Requestid,
+                            Filename = pm.File.FileName,
+                            Createddate = DateTime.Now,
+                        };
+                        _context.Requestwisefiles.Add(rwf);
+                        _context.SaveChanges();
+                    }
+
+                    return RedirectToAction("create_patient_request", "Home");
+                }
+                else
                 {
 
-                    InsertRequestWiseFile(pm.File);
-                    Requestwisefile rwf = new()
-                    {
-                        Requestid = request.Requestid,
-                        Filename = pm.File.FileName,
-                        Createddate = DateTime.Now,
-                    };
-                    _context.Requestwisefiles.Add(rwf);
+                    User user_obj = _context.Users.FirstOrDefault(u => u.Email == pm.Email);
+
+                    Request request = new Request();
+                    //change the fname, lname , and contact detials acc to the requestor
+                    request.Requesttypeid = 2;
+                    request.Userid = user_obj.Userid;
+                    request.Firstname = pm.FirstName;
+                    request.Lastname = pm.LastName;
+                    request.Phonenumber = pm.PhoneNo;
+                    request.Email = pm.Email;
+                    request.Createddate = DateTime.Now;
+                    request.Patientaccountid = user_obj.Aspnetuserid;
+                    request.Status = 1;
+                    request.Createduserid = user_obj.Userid;
+                    _context.Requests.Add(request);
                     _context.SaveChanges();
+
+                    Requestclient rc = new Requestclient();
+                    rc.Requestid = request.Requestid;
+                    rc.Firstname = pm.FirstName;
+                    rc.Lastname = pm.LastName;
+                    rc.Phonenumber = pm.PhoneNo;
+                    rc.Location = pm.City + pm.State;
+                    rc.Email = pm.Email;
+                    rc.Address = pm.RoomSuite + ", " + pm.Street + ", " + pm.City + ", " + pm.State + ", " + pm.ZipCode;
+                    rc.Street = pm.Street;
+                    rc.City = pm.City;
+                    rc.State = pm.State;
+                    rc.Zipcode = pm.ZipCode;
+                    rc.Notes = pm.Symptoms;
+
+                    _context.Requestclients.Add(rc);
+                    _context.SaveChanges();
+                    if (pm.File != null)
+                    {
+
+                        InsertRequestWiseFile(pm.File);
+                        Requestwisefile rwf = new()
+                        {
+                            Requestid = request.Requestid,
+                            Filename = pm.File.FileName,
+                            Createddate = DateTime.Now,
+                        };
+                        _context.Requestwisefiles.Add(rwf);
+                        _context.SaveChanges();
+                    }
+
+                    return RedirectToAction("create_patient_request", "Home");
                 }
 
-                return RedirectToAction("create_patient_request", "Home");
-            }
-            else
-            {
-
-                User user_obj = _context.Users.FirstOrDefault(u => u.Email == pm.Email);
-
-                Request request = new Request();
-                //change the fname, lname , and contact detials acc to the requestor
-                request.Requesttypeid = 2;
-                request.Userid = user_obj.Userid;
-                request.Firstname = pm.FirstName;
-                request.Lastname = pm.LastName;
-                request.Phonenumber = pm.PhoneNo;
-                request.Email = pm.Email;
-                request.Createddate = DateTime.Now;
-                request.Patientaccountid = user_obj.Aspnetuserid;
-                request.Status = 1;
-                request.Createduserid = user_obj.Userid;
-                _context.Requests.Add(request);
-                _context.SaveChanges();
-
-                Requestclient rc = new Requestclient();
-                rc.Requestid = request.Requestid;
-                rc.Firstname = pm.FirstName;
-                rc.Lastname = pm.LastName;
-                rc.Phonenumber = pm.PhoneNo;
-                rc.Location = pm.City + pm.State;
-                rc.Email = pm.Email;
-                rc.Address = pm.RoomSuite + ", " + pm.Street + ", " + pm.City + ", " + pm.State + ", " + pm.ZipCode;
-                rc.Street = pm.Street;
-                rc.City = pm.City;
-                rc.State = pm.State;
-                rc.Zipcode = pm.ZipCode;
-                rc.Notes = pm.Symptoms;
-
-                _context.Requestclients.Add(rc);
-                _context.SaveChanges();
-                if (pm.File != null)
-                {
-
-                    InsertRequestWiseFile(pm.File);
-                    Requestwisefile rwf = new()
-                    {
-                        Requestid = request.Requestid,
-                        Filename = pm.File.FileName,
-                        Createddate = DateTime.Now,
-                    };
-                    _context.Requestwisefiles.Add(rwf);
-                    _context.SaveChanges();
-                }
-
-                return RedirectToAction("create_patient_request", "Home");
             }
 
+
+            return View();
 
 
         }
@@ -296,43 +301,47 @@ namespace HalloDoc_Project.Controllers
         [AutoValidateAntiforgeryToken]
         public IActionResult forgot_password_page(ForgotPasswordViewModel fvm)
         {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_config["Jwt:Key"]);
-            var tokenDescriptor = new SecurityTokenDescriptor
+            if (ModelState.IsValid)
             {
-                Subject = new ClaimsIdentity(new[] { new Claim("email", fvm.email) }),
-                Expires = DateTime.UtcNow.AddHours(24),
-                Issuer = _config["Jwt:Issuer"],
-                //Audience = _audience,
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key)
-    , SecurityAlgorithms.HmacSha256Signature)
-            };
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            var jwtToken = tokenHandler.WriteToken(token);
 
-            var resetLink = Url.Action("ResetPassword", "Home", new { token = jwtToken }, Request.Scheme);
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var key = Encoding.ASCII.GetBytes(_config["Jwt:Key"]);
+                var tokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Subject = new ClaimsIdentity(new[] { new Claim("email", fvm.email) }),
+                    Expires = DateTime.UtcNow.AddHours(24),
+                    Issuer = _config["Jwt:Issuer"],
+                    //Audience = _audience,
+                    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                };
+                var token = tokenHandler.CreateToken(tokenDescriptor);
+                var jwtToken = tokenHandler.WriteToken(token);
 
-            //----------------------------------
+                var resetLink = Url.Action("ResetPassword", "Home", new { token = jwtToken }, Request.Scheme);
 
-            var smtpClient = new SmtpClient("smtp.office365.com")
-            {
-                Port = 587,
-                Credentials = new NetworkCredential("tatva.dotnet.rahulshah@outlook.com", "@08RahulTatvA"),
-                EnableSsl = true,
-                DeliveryMethod = SmtpDeliveryMethod.Network,
-                UseDefaultCredentials = false
-            };
-            //smtpClient.Send("tatva.dotnet.rahulshah@outlook.com", "rahul0810shah@gmail.com", "This is a trial email for smtpClient.", "this is token ->" + resetLink);
-            var mailMessage = new MailMessage
-            {
-                From = new MailAddress("tatva.dotnet.rahulshah@outlook.com"),
-                Subject = "Subject",
-                Body = "<h1>Hello , Good morning!!</h1><a href=\"" + resetLink + "\" >Reset your password</a>",
-                IsBodyHtml = true
-            };
-            mailMessage.To.Add(fvm.email);
-            smtpClient.Send(mailMessage);
-            return RedirectToAction("login_page");
+                //----------------------------------
+
+                var smtpClient = new SmtpClient("smtp.office365.com")
+                {
+                    Port = 587,
+                    Credentials = new NetworkCredential("tatva.dotnet.rahulshah@outlook.com", "@08RahulTatvA"),
+                    EnableSsl = true,
+                    DeliveryMethod = SmtpDeliveryMethod.Network,
+                    UseDefaultCredentials = false
+                };
+                //smtpClient.Send("tatva.dotnet.rahulshah@outlook.com", "rahul0810shah@gmail.com", "This is a trial email for smtpClient.", "this is token ->" + resetLink);
+                var mailMessage = new MailMessage
+                {
+                    From = new MailAddress("tatva.dotnet.rahulshah@outlook.com"),
+                    Subject = "Subject",
+                    Body = "<h1>Hello , Good morning!!</h1><a href=\"" + resetLink + "\" >Reset your password</a>",
+                    IsBodyHtml = true
+                };
+                mailMessage.To.Add(fvm.email);
+                smtpClient.Send(mailMessage);
+                return RedirectToAction("login_page");
+            }
+            return View();
         }
 
         [HttpPost]
@@ -371,7 +380,7 @@ namespace HalloDoc_Project.Controllers
             if (v != null)
             {
                 HttpContext.Session.SetString("Email", v.Email);
-                
+
                 return RedirectToAction("PatientDashboard");
             }
             return View();
