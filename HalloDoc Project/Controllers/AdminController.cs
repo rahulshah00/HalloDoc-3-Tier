@@ -22,20 +22,23 @@ namespace HalloDoc_Project.Controllers
 
         public IActionResult ViewCase(int requestid)
         {
-            Requestclient rc = _context.Requestclients.FirstOrDefault(x => x.Requestid == requestid);
-            ViewCaseViewModel vc = new()
+            if(ModelState.IsValid)
             {
-                requestID = rc.Requestid,
-                patientemail = rc.Email,
-                patientfirstname = rc.Firstname,
-                patientlastname = rc.Lastname,
-                patientnotes = rc.Notes,
-                patientphone = rc.Phonenumber,
-                address = rc.Address,
-                rooms = "N/A"
-            };
-
-            return View(vc);
+                Requestclient rc = _context.Requestclients.FirstOrDefault(x => x.Requestid == requestid);
+                ViewCaseViewModel vc = new()
+                {
+                    requestID = rc.Requestid,
+                    patientemail = rc.Email,
+                    patientfirstname = rc.Firstname,
+                    patientlastname = rc.Lastname,
+                    patientnotes = rc.Notes,
+                    patientphone = rc.Phonenumber,
+                    address = rc.Address,
+                    rooms = "N/A"
+                };
+                return View(vc);
+            }
+            return View();            
         }
 
         public IActionResult ViewNotes(int requestid)
