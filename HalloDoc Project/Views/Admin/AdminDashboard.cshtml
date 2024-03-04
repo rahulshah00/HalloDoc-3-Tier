@@ -305,31 +305,114 @@
 </div>
 
 
-
-
-
-
-
-<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+<div class="modal fade" id="AssignCaseModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLongTitle">Modal title</h5>
-                <button type="button"  class="close" data-bs-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+            <div class="modal-header bg-info">
+                <h5 class="modal-title text-light" id="AssignCaseHeader">Assign Request</h5>
+                <button type="button" class="btn-close btn-close-white aria-label="Close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
-                ...
+            <form class="AssignCaseForm">
+                <input hidden id="RequestId" name="RequestId" />
+                <div class="modal-body">
+                    <small class="text-muted">To assign this request, search and select new Physician.</small>
+
+                    <div class="form-floating my-2">
+                        <select class="form-select" name="AssignRegion" id="floatingSelect" aria-label="Floating label select example">
+                            <option selected>Select</option>
+                            @for (int i = 0; i < Model.regions.Count; i++)
+                            {
+                                <option value="@Model.regions[i].Regionid">@Model.regions[i].Name</option>
+                            }
+                        </select>
+                        <label for="floatingSelect ">Narrow Search By Region</label>
+                    </div>
+
+                    <select class="form-select" name="AssignPhysician" aria-label="Default select example">
+                        <option selected>Select Physician</option>
+                        @for (int i = 0; i < Model.physician.Count; i++)
+                        {
+                            <option value="@Model.physician[i].Physicianid">@Model.physician[i].Firstname @Model.physician[i].Lastname</option>
+                        }
+                    </select>
+
+                    <div class="form-floating my-2">
+                        <textarea class="form-control" name="AssignDescription" placeholder="Description" id="description" style="height: 100px"></textarea>
+                        <label for="description">Description</label>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-info text-light" data-bs-dismiss="modal">Submit</button>
+                    <button type="reset" class="btn btn-outline-info">Cancel</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="ConfirmCancellationModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-info">
+                <h5 class="modal-title text-light" id="ConfirmCancellationHeader">Confirm Cancellation</h5>
+                <button type="button" class="btn-close btn-close-white aria-label="Close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save changes</button>
-            </div>
+            <form class="ConfirmCancellationForm">
+                <input hidden id="requestid" name="requestid" />
+                <div class="modal-body">
+                    <div class="text-muted">Patient Name : <span class="text-info" id="clientname"></span> </div>
+
+                    <div class="my-2">
+                        <select class="form-select" name="CancelReason" aria-label="Default select example">
+                            <option selected>Reasons for cancellation</option>
+                            @for (int i = 0; i < @Model.casetags.Count; i++)
+                            {
+                                <option value="@Model.casetags[i].Casetagid">
+                                    @Model.casetags[i].Name
+                                </option>
+                            }
+                        </select>
+                    </div>
+                    <div class="form-floating my-2">
+                        <textarea class="form-control" name="CancelDescription" placeholder="Description" id="description" style="height: 100px"></textarea>
+                        <label for="description">Description</label>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-info text-light" data-bs-dismiss="modal">Confirm</button>
+                    <button type="reset" class="btn btn-outline-info">Cancel</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 
+<div class="modal fade" id="BlockCaseModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-info">
+                <h5 class="modal-title text-light" id="BlockCaseHeader">Confirm Block</h5>
+                <button type="button" class="btn-close btn-close-white aria-label="Close" data-bs-dismiss="modal"></button></button>
+            </div>
+            <form class="BlockCaseForm">
+                <input hidden id="RequestID" name="RequestID" />
+                <div class="modal-body">
+                    <div class="text-muted">Patient Name : <span class="text-info" id="displayname"></span> </div>
+                    <div class="form-floating my-2">
+                        <textarea class="form-control" placeholder="Reason for Block Request" name="BlockReason" id="blockrequest" style="height: 100px"></textarea>
+                        <label for="blockrequest" class="text-muted">Reason for Block Request</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-info text-light" data-bs-dismiss="modal">Confirm</button>
+                    <button type="reset" class="btn btn-outline-info">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 <script src="/js/admin.js"></script>
 
@@ -408,11 +491,58 @@
 
 </script>
 <script>
-    function assign() {
-        $('#exampleModalCenter').modal('show');
+    function assignCase(link) {
+        var request_id = link.getAttribute("data-requestid");
+        document.getElementById('RequestId').value = request_id;
+
+        $('#AssignCaseModal').modal('show');
     }
+
+    function cancelCase(link) {
+        debugger;
+        var request_id = link.getAttribute("data-requestid");
+        document.getElementById('requestid').value = request_id;
+
+        var name = link.getAttribute("data-name");
+        document.getElementById('clientname').textContent = name;
+
+        $('#ConfirmCancellationModal').modal('show');
+    }
+
+    function blockCase(link) {
+        var request_id = link.getAttribute("data-requestid");
+        document.getElementById('RequestID').value = request_id;
+
+        var name = link.getAttribute("data-name");
+        document.getElementById('displayname').textContent = name;
+        $('#BlockCaseModal').modal('show');
+    }
+
+    $('#AssignCaseForm').submit(function (event) 
+    { 
+        event.preventDefault();
+        
+        var formdata = $(this).serialize();
+        $.ajax({
+            url: '/Admin/AssignCase',
+            type: 'GET',
+            data: formdata,
+            success: function (response) {
+                $('#AssignCaseModal').modal('hide');
+                window.location.href = "/Admin/AdminDashboard";
+            },
+            error: function (xhr, status, error) {
+
+                console.error('Error submitting form:', error);
+            }
+        });
+
+    })
 </script>
 
+<script>
+
+</script>
 <script>
     $(".status-tab").click(function () {
         $(this).addClass("active");

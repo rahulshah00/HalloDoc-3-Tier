@@ -41,6 +41,20 @@ namespace HalloDoc_Project.Controllers
             return View();            
         }
 
+        public ActionResult CancelCase(int requestid,string Reason,string notes)
+        {
+
+            return Ok();
+        }
+        public ActionResult AssignCase()
+        {
+            return Ok();
+        }
+        public ActionResult BlockCase(String blockreason)
+        {
+
+            return Ok();
+        }
         public IActionResult ViewNotes(int requestid)
         {
             ViewCaseViewModel vn = new ViewCaseViewModel();
@@ -109,16 +123,22 @@ namespace HalloDoc_Project.Controllers
         }
         public IActionResult AdminDashboard()
         {
+            List<Physician> physician=_context.Physicians.ToList();
+            List<Region> regions=_context.Regions.ToList();
+            List<Casetag> casetags=_context.Casetags.ToList();
+
             AdminRequestsViewModel arvm = new AdminRequestsViewModel();
             AdminDashboardViewModel advm = new()
             {
+                physician=physician, 
+                regions=regions,
+                casetags=casetags,
                 New = _context.Requests.Count(u => u.Status == 1),
                 active = _context.Requests.Count(u => u.Status == 4 || u.Status == 5),
                 pending = _context.Requests.Count(u => u.Status == 2),
                 conclude = _context.Requests.Count(u => u.Status == 6),
                 toclose = _context.Requests.Count(u => u.Status == 7 || u.Status == 3 || u.Status == 8),
                 unpaid = _context.Requests.Count(u => u.Status == 9),
-                //adminRequests = adminRequests,
                 Username = arvm.Name
             };
 
