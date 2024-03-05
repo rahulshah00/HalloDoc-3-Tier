@@ -41,11 +41,7 @@ namespace HalloDoc_Project.Controllers
             return View();            
         }
 
-        public ActionResult CancelCase(int requestid,string Reason,string notes)
-        {
-
-            return Ok();
-        }
+       
         public ActionResult AssignCase()
         {
             return Ok();
@@ -141,9 +137,91 @@ namespace HalloDoc_Project.Controllers
                 unpaid = _context.Requests.Count(u => u.Status == 9),
                 Username = arvm.Name
             };
-
             return View(advm);
         }
+        [HttpPost]
+        public IActionResult AssignCase(int RequestId, string AssignPhysician, string AssignDescription)
+        {
+            var user = _context.Requests.FirstOrDefault(h => h.Requestid == RequestId);
+            if(user!=null)
+            {
+                user.Status = 2;
+                user.Modifieddate=DateTime.Now;
+                user.Physicianid = int.Parse(AssignPhysician);
+
+                _context.Update(user);
+                _context.SaveChanges();
+
+                Requeststatuslog requeststatuslog = new Requeststatuslog();
+
+                requeststatuslog.Requestid = RequestId;
+                requeststatuslog.Notes = AssignDescription;
+                requeststatuslog.Createddate = DateTime.Now;
+                requeststatuslog.Status = 2;
+
+                _context.Add(requeststatuslog);
+                _context.SaveChanges();
+            }
+            return Ok();
+        }
+        [HttpPost]
+        public ActionResult CancelCase(int requestid, string Reason, string Description)
+        {
+            var user = _context.Requests.FirstOrDefault(h => h.Requestid == requestid);
+            if (user != null)
+            {
+                user.Status = 3;
+                user.Casetag = Reason;
+
+                Requeststatuslog requeststatuslog = new Requeststatuslog();
+
+                requeststatuslog.Requestid = requestid;
+                requeststatuslog.Notes = Description;
+                requeststatuslog.Createddate = DateTime.Now;
+                requeststatuslog.Status = 3;
+
+                _context.Add(requeststatuslog);
+                _context.SaveChanges();
+
+                _context.Update(user);
+                _context.SaveChanges();
+
+                return RedirectToAction("Admin_Dash");
+            }
+            return Ok();
+        }
+        [HttpPost]
+        public IActionResult BlockCase(int requestid, string blocknotes)
+        {
+            var user= _context.Requests.FirstOrDefault(u=>u.Requestid== requestid);
+            if (user != null)
+            {
+                user.Status = 11;
+
+                _context.Update(user);
+                _context.SaveChanges();
+
+                Requeststatuslog requeststatuslog = new Requeststatuslog();
+
+                requeststatuslog.Requestid = requestid;
+                requeststatuslog.Notes = blocknotes ?? "--";
+                requeststatuslog.Createddate = DateTime.Now;
+                requeststatuslog.Status = 11;
+
+                _context.Add(requeststatuslog);
+                _context.SaveChanges();
+
+                Blockrequest blockRequest = new Blockrequest();
+
+                blockRequest.Requestid = requestid.ToString();
+                blockRequest.Createddate = DateTime.Now;
+                blockRequest.Email = user.Email;
+                blockRequest.Phonenumber = user.Phonenumber;
+                blockRequest.Reason = blocknotes ?? "--";
+            }
+            return Ok();
+        }
+
         [HttpPost]
         public IActionResult NewTable()
         {
@@ -184,8 +262,7 @@ namespace HalloDoc_Project.Controllers
                                      requestType = r.Requesttypeid,
                                      status = r.Status,
                                      physicianName = "Dr.XYZ",
-                                     servicedate = DateOnly.Parse("22-12-2022"),
-
+                                     servicedate = DateOnly.Parse("22-12-2022")
                                  }
                                 ).Where(x => x.status == 4 || x.status == 5).ToList();
             AdminDashboardViewModel model = new AdminDashboardViewModel()
@@ -217,7 +294,6 @@ namespace HalloDoc_Project.Controllers
             {
                 adminRequests = adminRequests,
             };
-
             return PartialView("PendingTable", model);
         }
         [HttpPost]
