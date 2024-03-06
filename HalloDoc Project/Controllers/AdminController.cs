@@ -272,6 +272,7 @@ namespace HalloDoc_Project.Controllers
 
             return PartialView("ActiveTable", model);
         }
+
         [HttpPost]
         public IActionResult PendingTable()
         {
@@ -290,6 +291,7 @@ namespace HalloDoc_Project.Controllers
                                      servicedate = DateOnly.Parse("22-12-2022")
                                  }
                                 ).Where(x => x.status == 2).ToList();
+
             AdminDashboardViewModel model = new AdminDashboardViewModel()
             {
                 adminRequests = adminRequests,
@@ -345,6 +347,35 @@ namespace HalloDoc_Project.Controllers
             };
 
             return PartialView("ToCloseTable", model);
+        }
+        public IActionResult ViewUploads()
+        {
+
+            return View();
+        }
+        public IActionResult SendOrders(int requestid)
+        {
+            SendOrderViewModel model = new SendOrderViewModel()
+            {
+                requestid = requestid
+            };
+            return View(model);
+        }
+        [HttpPost]
+        public IActionResult SendOrders(int requestid,SendOrderViewModel sendOrder)
+        {            
+            Orderdetail Order = new()
+            {
+                Requestid = requestid,
+                Faxnumber = sendOrder.FaxNo,
+                Email = sendOrder.BusEmail,
+                Businesscontact = sendOrder.BusContact,
+                Prescription = sendOrder.prescirption,
+                Noofrefill = sendOrder.RefillCount,
+                Createddate = DateTime.Now,
+                Vendorid=1
+            };
+            return View(sendOrder);
         }
         [HttpPost]
         public IActionResult UnpaidTable()

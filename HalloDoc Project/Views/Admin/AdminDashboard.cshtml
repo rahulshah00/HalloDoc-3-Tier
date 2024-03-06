@@ -493,6 +493,9 @@
                 success: function (data) {
                     $("#partial").html(data);
                 },
+                error: function (error) {
+                    alert('new error');
+                }
             });
         });
 
@@ -504,6 +507,9 @@
                 success: function (data) {
                     $("#partial").html(data);
                 },
+                error: function (error) {
+                    alert('active error');
+                }
             });
         });
         $('#status-pending-tab').on('click', function () {
@@ -514,6 +520,9 @@
                 success: function (data) {
                     $("#partial").html(data);
                 },
+                error: function (error) {
+                    alert('pending error');
+                }
             });
         });
         $('#status-conclude-tab').on('click', function () {
@@ -524,6 +533,9 @@
                 success: function (data) {
                     $("#partial").html(data);
                 },
+                error: function (error) {
+                    alert('con error');
+                }
             });
         });
         $('#status-toclose-tab').on('click', function () {
@@ -534,6 +546,9 @@
                 success: function (data) {
                     $("#partial").html(data);
                 },
+                error: function (error) {
+                    alert('to c error');
+                }
             });
         });
         $('#status-unpaid-tab').on('click', function () {
@@ -544,6 +559,9 @@
                 success: function (data) {
                     $("#partial").html(data);
                 },
+                error: function (error) {
+                    alert('unpaid error');
+                }
             });
         });
         $("#status-new-tab").click();
