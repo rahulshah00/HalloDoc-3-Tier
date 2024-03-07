@@ -20,6 +20,7 @@ namespace DAL.ViewModels
         public List<Casetag> casetags { get; set; }
         public List<Physician> physician { get; set; }
         public List<Region> regions { get; set; }
+        public int requestid {  get; set; }
         
     }
 }

@@ -229,6 +229,7 @@ namespace HalloDoc_Project.Controllers
                                  join rc in _context.Requestclients on r.Requestid equals rc.Requestid
                                  select new AdminRequestsViewModel
                                  {
+
                                      requestid= r.Requestid,
                                      Name = rc.Firstname + " " + rc.Lastname,
                                      Requesteddate = r.Createddate,
@@ -254,6 +255,7 @@ namespace HalloDoc_Project.Controllers
                                  join rc in _context.Requestclients on r.Requestid equals rc.Requestid
                                  select new AdminRequestsViewModel
                                  {
+                                     requestid = r.Requestid,
                                      Name = rc.Firstname + " " + rc.Lastname,
                                      Requestor = r.Firstname,
                                      PhoneNo = rc.Phonenumber,
@@ -280,6 +282,7 @@ namespace HalloDoc_Project.Controllers
                                  join rc in _context.Requestclients on r.Requestid equals rc.Requestid
                                  select new AdminRequestsViewModel
                                  {
+                                     requestid=r.Requestid,
                                      Name = rc.Firstname + " " + rc.Lastname,
                                      Requestor = r.Firstname,
                                      PhoneNo = rc.Phonenumber,
@@ -294,6 +297,7 @@ namespace HalloDoc_Project.Controllers
 
             AdminDashboardViewModel model = new AdminDashboardViewModel()
             {
+                
                 adminRequests = adminRequests,
             };
             return PartialView("PendingTable", model);
@@ -305,6 +309,7 @@ namespace HalloDoc_Project.Controllers
                                  join rc in _context.Requestclients on r.Requestid equals rc.Requestid
                                  select new AdminRequestsViewModel
                                  {
+                                     requestid = r.Requestid,
                                      Name = rc.Firstname + " " + rc.Lastname,
                                      Requestor = r.Firstname,
                                      PhoneNo = rc.Phonenumber,
@@ -318,6 +323,7 @@ namespace HalloDoc_Project.Controllers
                                 ).Where(x => x.status == 6).ToList();
             AdminDashboardViewModel model = new AdminDashboardViewModel()
             {
+                
                 adminRequests = adminRequests,
             };
 
@@ -330,6 +336,7 @@ namespace HalloDoc_Project.Controllers
                                  join rc in _context.Requestclients on r.Requestid equals rc.Requestid
                                  select new AdminRequestsViewModel
                                  {
+                                     requestid = r.Requestid,
                                      Name = rc.Firstname + " " + rc.Lastname,
                                      Requestor = r.Firstname,
                                      PhoneNo = rc.Phonenumber,
@@ -348,10 +355,63 @@ namespace HalloDoc_Project.Controllers
 
             return PartialView("ToCloseTable", model);
         }
-        public IActionResult ViewUploads()
+        public IActionResult DeleteFile(int fileid,int requestid)
         {
 
-            return View();
+            var fileRequest=_context.Requestwisefiles.FirstOrDefault(x => x.Requestwisefileid == fileid);
+            fileRequest.Isdeleted = true;
+
+            _context.Update(fileRequest);
+            _context.SaveChanges();
+
+            return RedirectToAction("ViewUploads",new { requestid= requestid});
+        }
+        public void InsertRequestWiseFile(IFormFile document,String uniqueID)
+        {
+            string path = _environment.WebRootPath;
+            string filePath = "Content/"+uniqueID+"$"+document.FileName;
+            string fullPath = Path.Combine(path, filePath);
+
+            using FileStream stream = new(fullPath, FileMode.Create);
+            document.CopyTo(stream);
+        }
+        public IActionResult ViewUploads(int requestid)
+        {
+            
+            var user = _context.Requests.FirstOrDefault(r=>r.Requestid==requestid);
+            var requestFile = _context.Requestwisefiles.Where(r => r.Requestid == requestid).ToList();
+            var requests=_context.Requests.FirstOrDefault(r=> r.Requestid==requestid);
+
+            ViewUploadsViewModel uploads = new()
+            {
+                ConfirmationNo = requests.Confirmationnumber,
+                Patientname=user.Firstname+" "+user.Lastname,
+                RequestID=requestid,
+                Requestwisefiles=requestFile
+            };
+            return View(uploads);
+        }
+        [HttpPost]
+        public IActionResult ViewUploads(ViewUploadsViewModel uploads)
+        {
+
+            if (uploads.File != null)
+            {
+                var uniqueid = Guid.NewGuid().ToString();
+                InsertRequestWiseFile(uploads.File,uniqueid);
+                
+                var filestring = Path.GetFileNameWithoutExtension(uploads.File.FileName);
+                var extensionstring=Path.GetExtension(uploads.File.FileName);
+                Requestwisefile requestwisefile = new()
+                {
+                    Filename = uniqueid + "$" + uploads.File.FileName,
+                    Requestid = uploads.RequestID,
+                    Createddate = DateTime.Now
+                };
+                _context.Update(requestwisefile);
+                _context.SaveChanges();
+            }
+            return RedirectToAction("ViewUploads", new { requestid = uploads.RequestID });
         }
         public IActionResult SendOrders(int requestid)
         {

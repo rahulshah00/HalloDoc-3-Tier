@@ -390,13 +390,13 @@ namespace HalloDoc_Project.Controllers
         {
             return View();
         }
-        public bool FileUpload()
-        {
-            Requestwisefile rwf = new()
-            {
-            };
-            return true;
-        }
+        //public bool FileUpload()
+        //{
+        //    Requestwisefile rwf = new()
+        //    {
+        //    };
+        //    return true;
+        //}
         public void InsertRequestWiseFile(IFormFile document)
         {
             string path = _environment.WebRootPath;
@@ -426,15 +426,18 @@ namespace HalloDoc_Project.Controllers
         [HttpPost]
         public IActionResult ViewDocuments(ViewDocumentsViewModel vm)
         {
-            InsertRequestWiseFile(vm.File);
-            Requestwisefile rwf = new()
+            if(vm.File!=null)
             {
-                Requestid = vm.RequestID,
-                Filename = vm.File.FileName,
-                Createddate = DateTime.Now,
-            };
-            _context.Requestwisefiles.Add(rwf);
-            _context.SaveChanges();
+                InsertRequestWiseFile(vm.File);
+                Requestwisefile rwf = new()
+                {
+                    Requestid = vm.RequestID,
+                    Filename = vm.File.FileName,
+                    Createddate = DateTime.Now,
+                };
+                _context.Requestwisefiles.Add(rwf);
+                _context.SaveChanges();
+            }        
 
             return ViewDocuments(vm.RequestID);
         }
@@ -629,31 +632,9 @@ namespace HalloDoc_Project.Controllers
 
         public IActionResult submit_request_page()
         {
-
             return View();
         }
-        public IActionResult DownLoadAll(int requestid)
-        {
-            var zipName = $"TestFiles-{DateTime.Now.ToString("yyyy_MM_dd-HH_mm_ss")}.zip";
-            using (MemoryStream ms = new MemoryStream())
-            {
-                //required: using System.IO.Compression;  
-                using (var zip = new ZipArchive(ms, ZipArchiveMode.Create, true))
-                {
-                    //QUery the Products table and get all image content  
-                    _context.Requests.ToList().ForEach(file =>
-                    {
-                        //var entry = zip.CreateEntry(file.);
-                        //using (var fileStream = new MemoryStream(file.ProImageContent))
-                        //using (var entryStream = entry.Open())
-                        //{
-                        //    fileStream.CopyTo(entryStream);
-                        //}
-                    });
-                }
-                return File(ms.ToArray(), "application/zip", zipName);
-            }
-        }
+
         public async Task<IActionResult> DownloadAllFiles(int requestId)
         {
             try
