@@ -20,6 +20,7 @@ using System.Security.Claims;
 using BAL.Interfaces;
 namespace HalloDoc_Project.Controllers
 {
+    [CustomAuthorize("Patient")]
     public class HomeController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -47,10 +48,7 @@ namespace HalloDoc_Project.Controllers
         {
             return View();
         }
-        public IActionResult create_patient_request()
-        {
-            return View();
-        }
+        
         public IActionResult SelectedDownload()
         {
             return View();
@@ -148,7 +146,7 @@ namespace HalloDoc_Project.Controllers
                         _context.SaveChanges();
                     }
 
-                    return RedirectToAction("create_patient_request", "Home");
+                    return RedirectToAction("create_patient_request", "Guest");
                 }
                 else
                 {
@@ -200,7 +198,7 @@ namespace HalloDoc_Project.Controllers
                         _context.SaveChanges();
                     }
 
-                    return RedirectToAction("create_patient_request", "Home");
+                    return RedirectToAction("create_patient_request", "Guest");
                 }
 
             }
@@ -219,10 +217,7 @@ namespace HalloDoc_Project.Controllers
 
         }
 
-        public IActionResult forgot_password_page()
-        {
-            return View();
-        }
+       
         public IActionResult PatientProfile()
         {
 
@@ -242,7 +237,10 @@ namespace HalloDoc_Project.Controllers
             };
             return View(ppm);
         }
-
+        public IActionResult forgot_password_page()
+        {
+            return View();
+        }
         [HttpGet]
         public ActionResult ResetPassword(string token)
         {
@@ -282,7 +280,6 @@ namespace HalloDoc_Project.Controllers
         [HttpPost]
         public IActionResult ResetPassword(ResetPasswordViewModel rpvm)
         {
-
             Aspnetuser aspnetuser = _context.Aspnetusers.FirstOrDefault(u => u.Email == rpvm.email);
             if (rpvm.password == rpvm.confirmpassword)
             {
@@ -339,7 +336,7 @@ namespace HalloDoc_Project.Controllers
                 };
                 mailMessage.To.Add(fvm.email);
                 smtpClient.Send(mailMessage);
-                return RedirectToAction("login_page");
+                return RedirectToAction("login_page", "Guest");
             }
             return View();
         }
@@ -390,13 +387,7 @@ namespace HalloDoc_Project.Controllers
         {
             return View();
         }
-        //public bool FileUpload()
-        //{
-        //    Requestwisefile rwf = new()
-        //    {
-        //    };
-        //    return true;
-        //}
+        
         public void InsertRequestWiseFile(IFormFile document)
         {
             string path = _environment.WebRootPath;
@@ -438,7 +429,6 @@ namespace HalloDoc_Project.Controllers
                 _context.Requestwisefiles.Add(rwf);
                 _context.SaveChanges();
             }        
-
             return ViewDocuments(vm.RequestID);
         }
         public IActionResult Business_Info()
@@ -494,7 +484,7 @@ namespace HalloDoc_Project.Controllers
             };
             _context.Requestclients.Add(rc);
             _context.SaveChanges();
-            return RedirectToAction("submit_request_page");
+            return RedirectToAction("submit_request_page","Guest");
         }
 
         public IActionResult Concierge_info()
@@ -552,7 +542,7 @@ namespace HalloDoc_Project.Controllers
             };
             _context.Requestclients.Add(rcl);
             _context.SaveChanges();
-            return RedirectToAction("submit_request_page");
+            return RedirectToAction("submit_request_page", "Guest");
         }
 
         public static string GenerateSHA256(string input)
@@ -627,12 +617,7 @@ namespace HalloDoc_Project.Controllers
             _context.Requestclients.Add(rcl);
             _context.SaveChanges();
 
-            return RedirectToAction("submit_request_page");
-        }
-
-        public IActionResult submit_request_page()
-        {
-            return View();
+            return RedirectToAction("submit_request_page","Guest");
         }
 
         public async Task<IActionResult> DownloadAllFiles(int requestId)
@@ -682,7 +667,7 @@ namespace HalloDoc_Project.Controllers
         public IActionResult logout()
         {
             HttpContext.Session.Clear();
-            return RedirectToAction("login_page");
+            return RedirectToAction("login_page","Guest");
         }
         public IActionResult ReviewAgreement()
         {

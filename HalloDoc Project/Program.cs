@@ -12,6 +12,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>();
 builder.Services.AddScoped<IPatient_Request, Patient_RequestRepo>();
+builder.Services.AddScoped<IJwtToken, JwtTokenServices>();
+
 //For Creating a session
 builder.Services.AddSession(options =>
 {
@@ -62,6 +64,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=submit_request_page}/{id?}");
+    pattern: "{controller=Guest}/{action=submit_request_page}/{id?}");
 
 app.Run();

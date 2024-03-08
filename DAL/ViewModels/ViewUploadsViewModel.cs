@@ -1,5 +1,6 @@
 ﻿using DAL.DataModels;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,5 +16,7 @@ namespace DAL.ViewModels
         public int RequestID { get; set; }
         public List<Requestwisefile> Requestwisefiles { get; set; }
         public IFormFile File { get; set;}
+        //public DbSet<Requestwisefile> RequestFile { get; set; }
+        public List<Request> req { get; set; }
     }
 }

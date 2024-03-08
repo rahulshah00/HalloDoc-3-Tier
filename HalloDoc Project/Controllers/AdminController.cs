@@ -2,8 +2,16 @@
 using DAL.DataModels;
 using Microsoft.AspNetCore.Mvc;
 using DAL.DataContext;
+using System.Net.Mail;
+using System.Net;
+using System.Reflection.Metadata;
+using System.IO;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Filters;
+using System.IdentityModel.Tokens.Jwt;
 namespace HalloDoc_Project.Controllers
 {
+    [CustomAuthorize("Admin")]
     public class AdminController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -366,6 +374,18 @@ namespace HalloDoc_Project.Controllers
 
             return RedirectToAction("ViewUploads",new { requestid= requestid});
         }
+
+        public IActionResult DeleteAllFiles(int requestid)
+        {
+            var request=_context.Requestwisefiles.Where(r=>r.Requestid == requestid && r.Isdeleted!=true).ToList();
+            for(int i=0;i<request.Count; i++)
+            {
+                request[i].Isdeleted = true;
+                _context.Update(request[i]);
+            }             
+            _context.SaveChanges();
+            return RedirectToAction("ViewUploads",new { requestid = requestid });
+        }
         public void InsertRequestWiseFile(IFormFile document,String uniqueID)
         {
             string path = _environment.WebRootPath;
@@ -391,10 +411,46 @@ namespace HalloDoc_Project.Controllers
             };
             return View(uploads);
         }
+        public IActionResult SendMail(int requestid)
+        {
+            var smtpClient = new SmtpClient("smtp.office365.com")
+            {
+                Port = 587,
+                Credentials = new NetworkCredential("tatva.dotnet.rahulshah@outlook.com", "@08RahulTatvA"),
+                EnableSsl = true,
+                DeliveryMethod = SmtpDeliveryMethod.Network,
+                UseDefaultCredentials = false
+            };
+            //smtpClient.Send("tatva.dotnet.rahulshah@outlook.com", "rahul0810shah@gmail.com", "This is a trial email for smtpClient.", "this is token ->" + resetLink);
+            var mailMessage = new MailMessage
+            {
+                From = new MailAddress("tatva.dotnet.rahulshah@outlook.com"),
+                Subject = "Subject",
+                Body = "<h1>Hello , Good morning!!</h1><a href=\""+"\" >Reset your password</a>",
+                IsBodyHtml = true
+            };
+            string path = _environment.WebRootPath;
+            var request = _context.Requestwisefiles.Where(r => r.Requestid == requestid && r.Isdeleted != true).ToList();
+            for (int i = 0; i < request.Count; i++)
+            {
+                string filePath = "Content/" + request[i].Filename;
+                string fullPath = Path.Combine(path, filePath);
+
+                byte[] fileBytes = System.IO.File.ReadAllBytes(fullPath);
+                MemoryStream ms = new MemoryStream(fileBytes);
+                mailMessage.Attachments.Add(new Attachment(ms, request[i].Filename ));
+            }
+
+            var user=_context.Requests.FirstOrDefault(r=>r.Requestid == requestid);
+            
+            mailMessage.To.Add(user.Email);
+            smtpClient.Send(mailMessage);
+            return RedirectToAction("ViewUploads", new { requestid=requestid });
+        }
+
         [HttpPost]
         public IActionResult ViewUploads(ViewUploadsViewModel uploads)
         {
-
             if (uploads.File != null)
             {
                 var uniqueid = Guid.NewGuid().ToString();
