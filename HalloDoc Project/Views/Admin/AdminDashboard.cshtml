@@ -350,6 +350,7 @@
         </div>
     </div>
 </div>
+
 <div class="modal fade" id="ConfirmCancellationModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
@@ -412,6 +413,79 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="TransferCaseModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-info">
+                <h5 class="modal-title text-light" id="TransferCaseHeader">Transfer Request</h5>
+                <button type="button" class="btn-close btn-close-white aria-label="Close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="TransferCaseForm">
+                <input hidden id="RequestId" name="RequestId" />
+                <div class="modal-body">
+                    <small class="text-muted">To assign this request, search and select new Physician.</small>
+
+                    <div class="form-floating my-2">
+                        <select class="form-select" id="selectregion" aria-label="Floating label select example">
+                            <option selected>Select</option>
+                            @for (int i = 0; i < Model.regions.Count; i++)
+                            {
+                                <option value="@Model.regions[i].Regionid">@Model.regions[i].Name</option>
+                            }
+                        </select>
+                        <label for="floatingSelect">Narrow Search By Region</label>
+                    </div>
+
+                    <select class="form-select" id="selectphysiciantransfer" name="TransferPhysician" aria-label="Default select example">
+                        <option selected disabled>Select Physician</option>
+                        @for (int i = 0; i < Model.physician.Count; i++)
+                        {
+                            <option value="@Model.physician[i].Physicianid">@Model.physician[i].Firstname @Model.physician[i].Lastname</option>
+                        }
+                    </select>
+
+                    <div class="form-floating my-2">
+                        <textarea class="form-control" name="TransferDescription" placeholder="Description" id="transferdescription" style="height: 100px"></textarea>
+                        <label for="description">Description</label>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-info text-light" data-bs-dismiss="modal">Submit</button>
+                    <button type="reset" class="btn btn-outline-info">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="ClearCaseModal" aria-labelledby="exampleModalCenterTitle">
+    <div class="modal-dialog rounded-3 modal-dialog-centered">
+        <div class="modal-content">
+            <form>
+                <div class="mt-4 pt-4 mx-4 modal-body align-items-center d-flex justify-content-center mt-4">
+                    <svg class="border-info" xmlns="http://www.w3.org/2000/svg" height="80px" viewBox="0 0 24 24" width="80px" fill="#faaa04"><path d="M0 0h24v24H0z" fill="none" /><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" /></svg>
+                </div>
+                <h3 class="d-flex justify-content-center">Confirmation for clear case</h3>
+
+                <div class="m-4 p-4 d-flex justify-content-center align-items-center">
+                    <input type="text" id="clearCaseId" hidden />
+                    <p class="text-center ">
+                        Are you sure you want to clear this request? Once cleared , you won't be able to see this request.
+                    </p>
+                </div>
+
+                <div class="modal-footer d-flex justify-content-center">
+                    <button type="button" id="clear-modal-submit-btn" class="btn btn-info text-white" data-bs-dismiss="modal">
+                        Clear
+                    </button>
+                    <button type="button" class="btn cancel-btn" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 
 <script src="/js/admin.js"></script>
 
@@ -485,6 +559,44 @@
                 }
             });
         });
+
+        $('#TransferCaseForm').submit(function (event) {
+            event.preventDefault();
+
+            $.ajax({
+                url: '/Admin/TransferCase',
+                type: 'POST',
+                data: { RequestId: $('#RequestId').val(), TransferPhysician: $('#selectphysiciantransfer').val(), TransferDescription: $('#transferdescription').val() },
+
+                success: function (response) {
+                    $('#TransferCaseModal').modal('hide');
+                    window.location.href = "/Admin/AdminDashboard";
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error submitting form:', error);
+                }
+            });
+        });
+        $('#clear-modal-submit-btn').on('click', function (e) {
+            e.preventDefault();
+            console.log('cancel cancel cancel');
+
+            $.ajax({
+                url: "/Admin/ClearCaseModal",
+                data: { requestid: $('#clearCaseId').val() },
+                type: 'POST',
+                success: function (result) {
+                    location.reload();
+                },
+                error: function (error) {
+                    console.log(error);
+                    alert('Error Cancelling Request')
+                },
+            });
+
+        });
+
+        
         $('#status-new-tab').on('click', function () {
             $.ajax({
                 url: '/Admin/NewTable',
@@ -586,6 +698,16 @@
         $('#ConfirmCancellationModal').modal('show');
     }
 
+    function clearCase(link){
+        var request_id = link.getAttribute("data-requestid");
+        document.getElementById('clearCaseId').value = request_id;
+
+        $('#ClearCaseModal').modal('show');
+    }
+    
+
+
+
     function blockCase(link) {
         var request_id = link.getAttribute("data-requestiD");
         document.getElementById('RequestID').value = request_id;
@@ -595,10 +717,12 @@
         $('#BlockCaseModal').modal('show');
     }
 
-    
+    function transferCase(link) {
+        var request_id = link.getAttribute("data-requestid");
+        document.getElementById('RequestId').value = request_id;
 
-    
-    
+        $('#TransferCaseModal').modal('show');
+    }
 
     $(".status-tab").click(function () {
         $(this).addClass("active");

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DAL.DataModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,5 +17,7 @@ namespace DAL.ViewModels
         public string prescirption {  get; set; }
         public int RefillCount {  get; set; }
         public int requestid {  get; set; }
+        public List<Healthprofessional> healthprofessionals { get; set; }
+        public List<Healthprofessionaltype> healthprofessionaltype {  get; set; }
     }
 }

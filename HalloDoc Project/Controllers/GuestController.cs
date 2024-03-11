@@ -377,6 +377,7 @@ namespace HalloDoc_Project.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult login_page(Aspnetuser demouser)
         {
+
             var password = GenerateSHA256(demouser.Passwordhash);
             Aspnetuser v = _context.Aspnetusers.FirstOrDefault(dt => dt.Username == demouser.Username && dt.Passwordhash == password);
             if (v != null)
@@ -385,6 +386,7 @@ namespace HalloDoc_Project.Controllers
                 var token = _jwtToken.generateJwtToken(v.Email, "Patient");
                 Response.Cookies.Append("jwt", token);
 
+                TempData["success"] = "Logged In Successfully";
                 return RedirectToAction("PatientDashboard","Home");
             }
             return View();

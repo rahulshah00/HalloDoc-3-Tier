@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using System.IdentityModel.Tokens.Jwt;
 namespace HalloDoc_Project.Controllers
 {
-    [CustomAuthorize("Admin")]
+
     public class AdminController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -28,9 +28,49 @@ namespace HalloDoc_Project.Controllers
             return View();
         }
 
+        public enum RequestStatus
+        {
+            Unassigned = 1,
+            Accepted = 2,
+            Cancelled = 3,
+            MDEnRoute = 4,
+            MDOnSite = 5,
+            Conclude = 6,
+            CancelledByPatient = 7,
+            Closed = 8,
+            Unpaid = 9,
+            Clear = 10,
+            Block = 11,
+        }
+
+        public enum DashboardStatus
+        {
+            New = 1,
+            Pending = 2,
+            Active = 3,
+            Conclude = 4,
+            ToClose = 5,
+            Unpaid = 6,
+        }
+
+        public enum RequestType
+        {
+            Business = 1,
+            Patient = 2,
+            Family = 3,
+            Concierge = 4
+        }
+
+        public enum AllowRole
+        {
+            Admin = 1,
+            Patient = 2,
+            Physician = 3
+        }
+
         public IActionResult ViewCase(int requestid)
         {
-            if(ModelState.IsValid)
+            if (ModelState.IsValid)
             {
                 Requestclient rc = _context.Requestclients.FirstOrDefault(x => x.Requestid == requestid);
                 ViewCaseViewModel vc = new()
@@ -46,10 +86,10 @@ namespace HalloDoc_Project.Controllers
                 };
                 return View(vc);
             }
-            return View();            
+            return View();
         }
 
-       
+
         public ActionResult AssignCase()
         {
             return Ok();
@@ -63,6 +103,10 @@ namespace HalloDoc_Project.Controllers
         {
             ViewCaseViewModel vn = new ViewCaseViewModel();
             return View();
+        }
+        public ActionResult TransferNotes()
+        {
+            return Ok();
         }
         public IActionResult AdminDBView()
         {
@@ -127,16 +171,16 @@ namespace HalloDoc_Project.Controllers
         }
         public IActionResult AdminDashboard()
         {
-            List<Physician> physician=_context.Physicians.ToList();
-            List<Region> regions=_context.Regions.ToList();
-            List<Casetag> casetags=_context.Casetags.ToList();
+            List<Physician> physician = _context.Physicians.ToList();
+            List<Region> regions = _context.Regions.ToList();
+            List<Casetag> casetags = _context.Casetags.ToList();
 
             AdminRequestsViewModel arvm = new AdminRequestsViewModel();
             AdminDashboardViewModel advm = new()
             {
-                physician=physician, 
-                regions=regions,
-                casetags=casetags,
+                physician = physician,
+                regions = regions,
+                casetags = casetags,
                 New = _context.Requests.Count(u => u.Status == 1),
                 active = _context.Requests.Count(u => u.Status == 4 || u.Status == 5),
                 pending = _context.Requests.Count(u => u.Status == 2),
@@ -151,10 +195,10 @@ namespace HalloDoc_Project.Controllers
         public IActionResult AssignCase(int RequestId, string AssignPhysician, string AssignDescription)
         {
             var user = _context.Requests.FirstOrDefault(h => h.Requestid == RequestId);
-            if(user!=null)
+            if (user != null)
             {
                 user.Status = 2;
-                user.Modifieddate=DateTime.Now;
+                user.Modifieddate = DateTime.Now;
                 user.Physicianid = int.Parse(AssignPhysician);
 
                 _context.Update(user);
@@ -201,7 +245,7 @@ namespace HalloDoc_Project.Controllers
         [HttpPost]
         public IActionResult BlockCase(int requestid, string blocknotes)
         {
-            var user= _context.Requests.FirstOrDefault(u=>u.Requestid== requestid);
+            var user = _context.Requests.FirstOrDefault(u => u.Requestid == requestid);
             if (user != null)
             {
                 user.Status = 11;
@@ -229,6 +273,74 @@ namespace HalloDoc_Project.Controllers
             }
             return Ok();
         }
+        [HttpPost]
+        public IActionResult TransferCase(int RequestId, string TransferPhysician, string TransferDescription)
+        {
+            var req = _context.Requests.FirstOrDefault(h => h.Requestid == RequestId);
+            if (req != null)
+            {
+                req.Status = 2;
+                req.Modifieddate = DateTime.Now;
+                req.Physicianid = int.Parse(TransferPhysician);
+
+                _context.Update(req);
+                _context.SaveChanges();
+
+                Requeststatuslog requeststatuslog = new Requeststatuslog();
+
+                requeststatuslog.Requestid = RequestId;
+                requeststatuslog.Notes = TransferDescription;
+                requeststatuslog.Createddate = DateTime.Now;
+                requeststatuslog.Status = 2;
+
+                _context.Add(requeststatuslog);
+                _context.SaveChanges();
+            }
+            return Ok();
+        }
+        [HttpPost]
+        public bool ClearCaseModal(int requestid)
+        {
+            string AdminEmail = HttpContext.Session.GetString("Email");
+            //Admin admin = _context.Admins.GetFirstOrDefault(a => a.Email == AdminEmail);
+
+            try
+            {
+                Request req = _context.Requests.FirstOrDefault(req => req.Requestid == requestid);
+
+                req.Modifieddate = DateTime.Now;
+
+
+
+                Requeststatuslog reqStatusLog = new Requeststatuslog()
+                {
+                    Requestid = requestid,
+                    Status = (short)RequestStatus.Clear,
+                    //Adminid = admins.Adminid,
+                    Notes = "Admin cleared this request",
+                    Createddate = DateTime.Now,
+                };
+
+                req.Status = (short)RequestStatus.Clear;
+                req.Modifieddate = DateTime.Now;
+
+
+                _context.Requests.Update(req);
+                _context.SaveChanges();
+
+                _context.Requeststatuslogs.Add(reqStatusLog);
+                _context.SaveChanges();
+
+                TempData["success"] = "Request Successfully transferred";
+                return true;
+            }
+            catch (Exception ex)
+            {
+                TempData["error"] = "Error Occured while transferring request.";
+                return false;
+            }
+
+        }
 
         [HttpPost]
         public IActionResult NewTable()
@@ -237,8 +349,7 @@ namespace HalloDoc_Project.Controllers
                                  join rc in _context.Requestclients on r.Requestid equals rc.Requestid
                                  select new AdminRequestsViewModel
                                  {
-
-                                     requestid= r.Requestid,
+                                     requestid = r.Requestid,
                                      Name = rc.Firstname + " " + rc.Lastname,
                                      Requesteddate = r.Createddate,
                                      Requestor = r.Firstname,
@@ -290,7 +401,7 @@ namespace HalloDoc_Project.Controllers
                                  join rc in _context.Requestclients on r.Requestid equals rc.Requestid
                                  select new AdminRequestsViewModel
                                  {
-                                     requestid=r.Requestid,
+                                     requestid = r.Requestid,
                                      Name = rc.Firstname + " " + rc.Lastname,
                                      Requestor = r.Firstname,
                                      PhoneNo = rc.Phonenumber,
@@ -305,7 +416,7 @@ namespace HalloDoc_Project.Controllers
 
             AdminDashboardViewModel model = new AdminDashboardViewModel()
             {
-                
+
                 adminRequests = adminRequests,
             };
             return PartialView("PendingTable", model);
@@ -331,7 +442,7 @@ namespace HalloDoc_Project.Controllers
                                 ).Where(x => x.status == 6).ToList();
             AdminDashboardViewModel model = new AdminDashboardViewModel()
             {
-                
+
                 adminRequests = adminRequests,
             };
 
@@ -363,33 +474,33 @@ namespace HalloDoc_Project.Controllers
 
             return PartialView("ToCloseTable", model);
         }
-        public IActionResult DeleteFile(int fileid,int requestid)
+        public IActionResult DeleteFile(int fileid, int requestid)
         {
 
-            var fileRequest=_context.Requestwisefiles.FirstOrDefault(x => x.Requestwisefileid == fileid);
+            var fileRequest = _context.Requestwisefiles.FirstOrDefault(x => x.Requestwisefileid == fileid);
             fileRequest.Isdeleted = true;
 
             _context.Update(fileRequest);
             _context.SaveChanges();
 
-            return RedirectToAction("ViewUploads",new { requestid= requestid});
+            return RedirectToAction("ViewUploads", new { requestid = requestid });
         }
 
         public IActionResult DeleteAllFiles(int requestid)
         {
-            var request=_context.Requestwisefiles.Where(r=>r.Requestid == requestid && r.Isdeleted!=true).ToList();
-            for(int i=0;i<request.Count; i++)
+            var request = _context.Requestwisefiles.Where(r => r.Requestid == requestid && r.Isdeleted != true).ToList();
+            for (int i = 0; i < request.Count; i++)
             {
                 request[i].Isdeleted = true;
                 _context.Update(request[i]);
-            }             
+            }
             _context.SaveChanges();
-            return RedirectToAction("ViewUploads",new { requestid = requestid });
+            return RedirectToAction("ViewUploads", new { requestid = requestid });
         }
-        public void InsertRequestWiseFile(IFormFile document,String uniqueID)
+        public void InsertRequestWiseFile(IFormFile document, String uniqueID)
         {
             string path = _environment.WebRootPath;
-            string filePath = "Content/"+uniqueID+"$"+document.FileName;
+            string filePath = "Content/" + uniqueID + "$" + document.FileName;
             string fullPath = Path.Combine(path, filePath);
 
             using FileStream stream = new(fullPath, FileMode.Create);
@@ -397,17 +508,17 @@ namespace HalloDoc_Project.Controllers
         }
         public IActionResult ViewUploads(int requestid)
         {
-            
-            var user = _context.Requests.FirstOrDefault(r=>r.Requestid==requestid);
+
+            var user = _context.Requests.FirstOrDefault(r => r.Requestid == requestid);
             var requestFile = _context.Requestwisefiles.Where(r => r.Requestid == requestid).ToList();
-            var requests=_context.Requests.FirstOrDefault(r=> r.Requestid==requestid);
+            var requests = _context.Requests.FirstOrDefault(r => r.Requestid == requestid);
 
             ViewUploadsViewModel uploads = new()
             {
                 ConfirmationNo = requests.Confirmationnumber,
-                Patientname=user.Firstname+" "+user.Lastname,
-                RequestID=requestid,
-                Requestwisefiles=requestFile
+                Patientname = user.Firstname + " " + user.Lastname,
+                RequestID = requestid,
+                Requestwisefiles = requestFile
             };
             return View(uploads);
         }
@@ -426,7 +537,7 @@ namespace HalloDoc_Project.Controllers
             {
                 From = new MailAddress("tatva.dotnet.rahulshah@outlook.com"),
                 Subject = "Subject",
-                Body = "<h1>Hello , Good morning!!</h1><a href=\""+"\" >Reset your password</a>",
+                Body = "<h1>Hello , Good morning!!</h1><a href=\"" + "\" >Reset your password</a>",
                 IsBodyHtml = true
             };
             string path = _environment.WebRootPath;
@@ -438,14 +549,14 @@ namespace HalloDoc_Project.Controllers
 
                 byte[] fileBytes = System.IO.File.ReadAllBytes(fullPath);
                 MemoryStream ms = new MemoryStream(fileBytes);
-                mailMessage.Attachments.Add(new Attachment(ms, request[i].Filename ));
+                mailMessage.Attachments.Add(new Attachment(ms, request[i].Filename));
             }
 
-            var user=_context.Requests.FirstOrDefault(r=>r.Requestid == requestid);
-            
+            var user = _context.Requests.FirstOrDefault(r => r.Requestid == requestid);
+
             mailMessage.To.Add(user.Email);
             smtpClient.Send(mailMessage);
-            return RedirectToAction("ViewUploads", new { requestid=requestid });
+            return RedirectToAction("ViewUploads", new { requestid = requestid });
         }
 
         [HttpPost]
@@ -454,10 +565,10 @@ namespace HalloDoc_Project.Controllers
             if (uploads.File != null)
             {
                 var uniqueid = Guid.NewGuid().ToString();
-                InsertRequestWiseFile(uploads.File,uniqueid);
-                
+                InsertRequestWiseFile(uploads.File, uniqueid);
+
                 var filestring = Path.GetFileNameWithoutExtension(uploads.File.FileName);
-                var extensionstring=Path.GetExtension(uploads.File.FileName);
+                var extensionstring = Path.GetExtension(uploads.File.FileName);
                 Requestwisefile requestwisefile = new()
                 {
                     Filename = uniqueid + "$" + uploads.File.FileName,
@@ -478,8 +589,8 @@ namespace HalloDoc_Project.Controllers
             return View(model);
         }
         [HttpPost]
-        public IActionResult SendOrders(int requestid,SendOrderViewModel sendOrder)
-        {            
+        public IActionResult SendOrders(int requestid, SendOrderViewModel sendOrder)
+        {
             Orderdetail Order = new()
             {
                 Requestid = requestid,
@@ -489,7 +600,7 @@ namespace HalloDoc_Project.Controllers
                 Prescription = sendOrder.prescirption,
                 Noofrefill = sendOrder.RefillCount,
                 Createddate = DateTime.Now,
-                Vendorid=1
+                Vendorid = 1
             };
             return View(sendOrder);
         }

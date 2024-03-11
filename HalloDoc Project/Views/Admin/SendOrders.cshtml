@@ -20,14 +20,21 @@
         <div class="row pt-3">
             <div class="col-md-6 col-12 temp form-floating mt-3">
                 <select class="form-select" asp-for="profession" id="floatingSelectGrid">
-                    <option value="1">Physician1</option>
-                    <option value="2">Physician2</option>
+                    @for(int i=0;i<Model.healthprofessionaltype.Count;i++)
+                    {
+                        <option value="@Model.healthprofessionaltype[i].Healthprofessionalid">@Model.healthprofessionaltype[i].Professionname</option>
+                    }
                 </select>
                 <label for="floatingSelectGrid" class="input_labels ms-2">Select Profession</label>
             </div> 
             <div class="col-md-6 col-12 form-floating temp mt-3" >
-                <input type="text" asp-for="business" required class="form-control inputs border" placeholder="name@example.com">
-                <label for="floatingInput" class="input_labels ms-2">Business</label>
+                <select class="form-select" asp-for="business" id="floatingSelectGrid">
+                    @for (int i = 0; i < Model.healthprofessionals.Count; i++)
+                    {
+                        <option value="@Model.healthprofessionals[i].Vendorid">@Model.healthprofessionals[i].Vendorname</option>
+                    }
+                </select>
+                <label for="floatingSelectGrid" class="input_labels ms-2">Select Business</label>
             </div>
             <div class="col-md-6 col-12 form-floating temp mt-3">
                 <input type="text" asp-for="BusContact" class="form-control inputs border" placeholder="name@example.com">
