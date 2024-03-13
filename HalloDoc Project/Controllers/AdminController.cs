@@ -9,6 +9,11 @@ using System.IO;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
+using System.Text;
+using Microsoft.AspNetCore.Http.Features;
+using System.Security.Cryptography.X509Certificates;
 namespace HalloDoc_Project.Controllers
 {
 
@@ -120,7 +125,8 @@ namespace HalloDoc_Project.Controllers
                                      PhoneNo = rc.Phonenumber,
                                      Address = rc.Address,
                                      OtherPhoneNo = r.Phonenumber,
-                                     requestType = r.Requesttypeid
+                                     requestType = r.Requesttypeid,
+                                     email = rc.Email
                                  }).ToList();
 
             AdminRequestsViewModel arvm = new AdminRequestsViewModel();
@@ -410,7 +416,8 @@ namespace HalloDoc_Project.Controllers
                                      requestType = r.Requesttypeid,
                                      status = r.Status,
                                      physicianName = "Dr.XYZ",
-                                     servicedate = DateOnly.Parse("22-12-2022")
+                                     servicedate = DateOnly.Parse("22-12-2022"),
+                                     email = rc.Email
                                  }
                                 ).Where(x => x.status == 2).ToList();
 
@@ -437,7 +444,9 @@ namespace HalloDoc_Project.Controllers
                                      requestType = r.Requesttypeid,
                                      status = r.Status,
                                      physicianName = "Dr.XYZ",
-                                     servicedate = DateOnly.Parse("22-12-2022")
+                                     servicedate = DateOnly.Parse("22-12-2022"),
+                                     email = rc.Email
+
                                  }
                                 ).Where(x => x.status == 6).ToList();
             AdminDashboardViewModel model = new AdminDashboardViewModel()
@@ -464,7 +473,9 @@ namespace HalloDoc_Project.Controllers
                                      requestType = r.Requesttypeid,
                                      status = r.Status,
                                      physicianName = "Dr.XYZ",
-                                     servicedate = DateOnly.Parse("22-12-2022")
+                                     servicedate = DateOnly.Parse("22-12-2022"),
+                                     email = rc.Email
+
                                  }
                                 ).Where(x => x.status == 3 || x.status == 7 || x.status == 8).ToList();
             AdminDashboardViewModel model = new AdminDashboardViewModel()
@@ -558,7 +569,44 @@ namespace HalloDoc_Project.Controllers
             smtpClient.Send(mailMessage);
             return RedirectToAction("ViewUploads", new { requestid = requestid });
         }
-
+        public IActionResult ReviewAgreement(int ReqId)
+        {
+            
+            return View();
+        }
+        [HttpPost]
+        public IActionResult AcceptAgreement()
+        {
+            return View();
+        }
+        [HttpPost]
+        public IActionResult SendAgreement(int RequestId,string PhoneNo,string email)
+        {
+            if (ModelState.IsValid)
+            {
+                var AgreementLink = Url.Action("ReviewAgreement", "Guest", new {ReqId=RequestId}, Request.Scheme);
+                //----------------------------------
+                var smtpClient = new SmtpClient("smtp.office365.com")
+                {
+                    Port = 587,
+                    Credentials = new NetworkCredential("tatva.dotnet.rahulshah@outlook.com", "@08RahulTatvA"),
+                    EnableSsl = true,
+                    DeliveryMethod = SmtpDeliveryMethod.Network,
+                    UseDefaultCredentials = false
+                };
+                var mailMessage = new MailMessage
+                {
+                    From = new MailAddress("tatva.dotnet.rahulshah@outlook.com"),
+                    Subject = "Subject",
+                    Body = "<h1>Hello , Good morning!!</h1><a href=\"" + AgreementLink + "\" >Reset your password</a>",
+                    IsBodyHtml = true
+                };
+                mailMessage.To.Add(email);
+                smtpClient.Send(mailMessage);
+                return RedirectToAction("AdminDashboard", "Guest");
+            }
+            return View();
+        }
         [HttpPost]
         public IActionResult ViewUploads(ViewUploadsViewModel uploads)
         {
@@ -582,9 +630,13 @@ namespace HalloDoc_Project.Controllers
         }
         public IActionResult SendOrders(int requestid)
         {
+            List<Healthprofessional> healthprofessionals = _context.Healthprofessionals.ToList();  
+            List<Healthprofessionaltype> healthprofessionaltypes= _context.Healthprofessionaltypes.ToList();
             SendOrderViewModel model = new SendOrderViewModel()
             {
-                requestid = requestid
+                requestid = requestid,
+                healthprofessionals=healthprofessionals,
+                healthprofessionaltype=healthprofessionaltypes
             };
             return View(model);
         }
@@ -597,12 +649,17 @@ namespace HalloDoc_Project.Controllers
                 Faxnumber = sendOrder.FaxNo,
                 Email = sendOrder.BusEmail,
                 Businesscontact = sendOrder.BusContact,
-                Prescription = sendOrder.prescirption,
+                Prescription = sendOrder.prescription,
                 Noofrefill = sendOrder.RefillCount,
                 Createddate = DateTime.Now,
                 Vendorid = 1
             };
             return View(sendOrder);
+        }
+        public List<Healthprofessional> filterVenByPro(string ProfessionId)
+        {
+            var result = _context.Healthprofessionals.Where(u => u.Profession == int.Parse(ProfessionId)).ToList();
+            return result;
         }
         [HttpPost]
         public IActionResult UnpaidTable()
@@ -619,7 +676,9 @@ namespace HalloDoc_Project.Controllers
                                      requestType = r.Requesttypeid,
                                      status = r.Status,
                                      physicianName = "Dr.XYZ",
-                                     servicedate = DateOnly.Parse("22-12-2022")
+                                     servicedate = DateOnly.Parse("22-12-2022"),
+                                     email = rc.Email
+
                                  }
                                 ).Where(x => x.status == 9).ToList();
             AdminDashboardViewModel model = new AdminDashboardViewModel()
@@ -630,3 +689,4 @@ namespace HalloDoc_Project.Controllers
         }
     }
 }
+

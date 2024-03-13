@@ -19,7 +19,8 @@
     <form method="post">
         <div class="row pt-3">
             <div class="col-md-6 col-12 temp form-floating mt-3">
-                <select class="form-select" asp-for="profession" id="floatingSelectGrid">
+                <select class="form-select" asp-for="profession" id="SelectProfession">
+                    <option value="null" selected disabled>Select Profession</option>
                     @for(int i=0;i<Model.healthprofessionaltype.Count;i++)
                     {
                         <option value="@Model.healthprofessionaltype[i].Healthprofessionalid">@Model.healthprofessionaltype[i].Professionname</option>
@@ -28,7 +29,8 @@
                 <label for="floatingSelectGrid" class="input_labels ms-2">Select Profession</label>
             </div> 
             <div class="col-md-6 col-12 form-floating temp mt-3" >
-                <select class="form-select" asp-for="business" id="floatingSelectGrid">
+                <select class="form-select" asp-for="business" id="SelectBusiness">
+                    <option value="0" selected disabled>Select Business</option>
                     @for (int i = 0; i < Model.healthprofessionals.Count; i++)
                     {
                         <option value="@Model.healthprofessionals[i].Vendorid">@Model.healthprofessionals[i].Vendorname</option>
@@ -37,23 +39,23 @@
                 <label for="floatingSelectGrid" class="input_labels ms-2">Select Business</label>
             </div>
             <div class="col-md-6 col-12 form-floating temp mt-3">
-                <input type="text" asp-for="BusContact" class="form-control inputs border" placeholder="name@example.com">
+                <input type="text" asp-for="BusContact" id="Vencontact" class="form-control inputs border" placeholder="BusinessContact">
                 <label for="floatingInput" class="input_labels ms-2">Business Contact</label>
             </div>
 
             <div class="col-md-6 col-12 form-floating temp mt-3 ">
-                <input type="email" asp-for="BusEmail" class="form-control inputs border" placeholder="name@example.com">
+                <input type="email" asp-for="BusEmail" id="Venemail" class="form-control inputs border" placeholder="Email">
                 <label for="floatingInput" class="input_labels ms-2">Email</label>
             </div>
             <div class="col-md-6 col-12 form-floating temp mt-3 ">
-                <input type="text" asp-for="FaxNo" class="form-control inputs border" placeholder="name@example.com">
+                <input type="text" asp-for="FaxNo" id="VenFax" class="form-control inputs border" placeholder="Fax Number>
                 <label for="floatingInput" class="input_labels ms-2">Fax Number</label>
             </div>
         </div>
 
         <div class="row">
             <div class="mt-3 form-floating temp">
-                <textarea type="text-area" asp-for="prescirption" class="form-control inputs" style="height: 125px;" placeholder="name@example.com"></textarea>
+                <textarea type="text-area" asp-for="prescription" class="form-control inputs" style="height: 125px;" placeholder="name@example.com"></textarea>
                 <label for="floatingInput" class="ms-2 input_labels text-wrap">
                     Prescription for Order details
                 </label>
@@ -81,3 +83,47 @@
     </form>
 </div>
 </div>
+<script>
+    function filterVendorsByProfession(ProfessionId) {
+        if (ProfessionId != "0") {
+            $.ajax({
+                type: "GET",
+                url: "/Admin/filterVenByPro",
+                data: { ProfessionId: ProfessionId },
+
+                success: function (data) {
+                    $("#Vencontact").val('');
+                    $("#Venemail").val('');
+                    $("#VenFax").val('');
+                    $('#SelectBusiness').empty();
+                    $.each(data, function (index, item) {
+                        $('#SelectBusiness').append($('<option>').text(item.vendorname).attr('value', item.vendorid));
+                    });
+                    $('#SelectBusiness option:first').prop('selected', true);
+                }
+            });
+        }
+    }
+    $("#SelectProfession").on("change", function () {
+        var ProfessionId = $("#SelectProfession").val();
+        filterVendorsByProfession(ProfessionId);
+    });
+
+    function getBusinessData(BusinessId) {
+        if (BusinessId != "0") {
+            $.ajax({
+                type: "GET",
+                url: "/Admin/BusinessData",
+                data: { BusinessId: BusinessId },
+
+                success: function (data) {
+                                        
+                }
+            });
+        }
+    }
+    $("#SelectBusiness").on("change", function () {
+        var BusinessId = $("#SelectBusiness").val();
+        filterVendorsByProfession(BusinessId);
+    });
+</script>

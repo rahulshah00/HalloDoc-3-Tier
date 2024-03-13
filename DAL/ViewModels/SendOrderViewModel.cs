@@ -14,7 +14,7 @@ namespace DAL.ViewModels
         public string BusContact {  get; set; }
         public string BusEmail {  get; set; }
         public string FaxNo { get; set; }
-        public string prescirption {  get; set; }
+        public string prescription {  get; set; }
         public int RefillCount {  get; set; }
         public int requestid {  get; set; }
         public List<Healthprofessional> healthprofessionals { get; set; }

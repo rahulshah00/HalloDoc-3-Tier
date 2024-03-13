@@ -24,5 +24,6 @@ namespace DAL.ViewModels
         public DateOnly servicedate { get; set; }
         public string region { get; set; }
         public int requestid {  get; set; }
+        public string email {  get; set; }
     }
 }

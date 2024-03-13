@@ -669,10 +669,6 @@ namespace HalloDoc_Project.Controllers
             HttpContext.Session.Clear();
             return RedirectToAction("login_page","Guest");
         }
-        public IActionResult ReviewAgreement()
-        {
-            return View();
-        }
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

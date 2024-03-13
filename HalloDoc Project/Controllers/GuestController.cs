@@ -44,6 +44,66 @@ namespace HalloDoc_Project.Controllers
                 return sb.ToString();
             }
         }
+        public IActionResult Agree(int Requestid)
+        {
+            Request req = _context.Requests.FirstOrDefault(x => x.Requestid == Requestid);
+
+            req.Status = 4;
+            req.Modifieddate = DateTime.Now;
+
+            _context.Update(req);
+            _context.SaveChanges();
+
+            Requeststatuslog requeststatuslog = new Requeststatuslog();
+
+            requeststatuslog.Requestid = Requestid;
+            requeststatuslog.Notes = "Agreement Accepted";
+            requeststatuslog.Createddate = DateTime.Now;
+            requeststatuslog.Status = 4;
+
+            _context.Add(requeststatuslog);
+            _context.SaveChanges();
+
+            return RedirectToAction("login_page", "Guest");
+        }
+        public IActionResult CancelAgreement(int Requestid,string Notes)
+        {
+            Request req = _context.Requests.FirstOrDefault(x => x.Requestid == Requestid);
+
+            req.Status = 7;
+            req.Modifieddate = DateTime.Now;
+
+            _context.Update(req);
+            _context.SaveChanges();
+
+            Requeststatuslog requeststatuslog = new Requeststatuslog();
+
+            requeststatuslog.Requestid = Requestid;
+            requeststatuslog.Notes = Notes;
+            requeststatuslog.Createddate = DateTime.Now;
+            requeststatuslog.Status = 7;
+
+            _context.Add(requeststatuslog);
+            _context.SaveChanges();
+
+            return RedirectToAction("login_page", "Guest");
+        
+        }
+        public IActionResult ReviewAgreement(int ReqId)
+        {
+            var user=_context.Requestclients.FirstOrDefault(x =>x.Requestid==ReqId);
+            if(user!=null)
+            {
+                ReviewAgreementViewModel reviewmodel = new()
+                {
+                    reqID = ReqId,
+                    PatientName = user.Firstname + " " + user.Lastname
+                };
+                return View(reviewmodel);
+            }
+            return RedirectToAction("submit_request_page");
+            
+        }
         public IActionResult Index()
         {
             return View();
