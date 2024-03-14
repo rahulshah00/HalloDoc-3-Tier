@@ -14,6 +14,7 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Http.Features;
 using System.Security.Cryptography.X509Certificates;
+using BAL.Interfaces;
 namespace HalloDoc_Project.Controllers
 {
 
@@ -22,11 +23,13 @@ namespace HalloDoc_Project.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _environment;
         private readonly IConfiguration _config;
-        public AdminController(ApplicationDbContext context, IWebHostEnvironment environment, IConfiguration config)
+        private readonly IEmailService _emailService;
+        public AdminController(ApplicationDbContext context, IWebHostEnvironment environment, IConfiguration config, IEmailService emailService)
         {
             _context = context;
             _environment = environment;
             _config = config;
+            _emailService = emailService;
         }
         public IActionResult Index()
         {
@@ -533,45 +536,18 @@ namespace HalloDoc_Project.Controllers
             };
             return View(uploads);
         }
-        public IActionResult SendMail(int requestid)
+        public IActionResult SetPath(int requestid)
         {
-            var smtpClient = new SmtpClient("smtp.office365.com")
-            {
-                Port = 587,
-                Credentials = new NetworkCredential("tatva.dotnet.rahulshah@outlook.com", "@08RahulTatvA"),
-                EnableSsl = true,
-                DeliveryMethod = SmtpDeliveryMethod.Network,
-                UseDefaultCredentials = false
-            };
-            //smtpClient.Send("tatva.dotnet.rahulshah@outlook.com", "rahul0810shah@gmail.com", "This is a trial email for smtpClient.", "this is token ->" + resetLink);
-            var mailMessage = new MailMessage
-            {
-                From = new MailAddress("tatva.dotnet.rahulshah@outlook.com"),
-                Subject = "Subject",
-                Body = "<h1>Hello , Good morning!!</h1><a href=\"" + "\" >Reset your password</a>",
-                IsBodyHtml = true
-            };
-            string path = _environment.WebRootPath;
-            var request = _context.Requestwisefiles.Where(r => r.Requestid == requestid && r.Isdeleted != true).ToList();
-            for (int i = 0; i < request.Count; i++)
-            {
-                string filePath = "Content/" + request[i].Filename;
-                string fullPath = Path.Combine(path, filePath);
-
-                byte[] fileBytes = System.IO.File.ReadAllBytes(fullPath);
-                MemoryStream ms = new MemoryStream(fileBytes);
-                mailMessage.Attachments.Add(new Attachment(ms, request[i].Filename));
-            }
-
-            var user = _context.Requests.FirstOrDefault(r => r.Requestid == requestid);
-
-            mailMessage.To.Add(user.Email);
-            smtpClient.Send(mailMessage);
-            return RedirectToAction("ViewUploads", new { requestid = requestid });
+            var path = _environment.WebRootPath;
+            return SendMail(requestid, path);
+        }
+        public IActionResult SendMail(int requestid,string path)
+        {
+            _emailService.SendEmailWithAttachments(requestid, path);
+            return RedirectToAction("ViewUploads","Admin");
         }
         public IActionResult ReviewAgreement(int ReqId)
         {
-            
             return View();
         }
         [HttpPost]
@@ -606,6 +582,11 @@ namespace HalloDoc_Project.Controllers
                 return RedirectToAction("AdminDashboard", "Guest");
             }
             return View();
+        }
+        public IActionResult BusinessData(int BusinessId)
+        {
+            var result = _context.Healthprofessionals.FirstOrDefault(x => x.Vendorid == BusinessId);
+            return Json(result);
         }
         [HttpPost]
         public IActionResult ViewUploads(ViewUploadsViewModel uploads)
@@ -654,13 +635,16 @@ namespace HalloDoc_Project.Controllers
                 Createddate = DateTime.Now,
                 Vendorid = 1
             };
-            return View(sendOrder);
+            _context.Add(Order);
+            _context.SaveChanges();
+            return SendOrders(requestid);
         }
         public List<Healthprofessional> filterVenByPro(string ProfessionId)
         {
             var result = _context.Healthprofessionals.Where(u => u.Profession == int.Parse(ProfessionId)).ToList();
             return result;
         }
+
         [HttpPost]
         public IActionResult UnpaidTable()
         {
@@ -678,7 +662,6 @@ namespace HalloDoc_Project.Controllers
                                      physicianName = "Dr.XYZ",
                                      servicedate = DateOnly.Parse("22-12-2022"),
                                      email = rc.Email
-
                                  }
                                 ).Where(x => x.status == 9).ToList();
             AdminDashboardViewModel model = new AdminDashboardViewModel()

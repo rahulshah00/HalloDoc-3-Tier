@@ -12,11 +12,11 @@ namespace DAL.ViewModels
     {
         public string BsFirstName {  get; set; }  
         public string BsLastName {  get; set; }
-        public string BsPhoneNo {  get; set; }
+        public string? BsPhoneNo {  get; set; }
         
         public string BsEmail {  get; set; }
         public string BusinessName {  get; set; }
-        public int BsCaseNo {  get; set; }
+        public int? BsCaseNo {  get; set; }
         public string Symptoms {  get; set; }
         public string PtFirstName {  get; set; }
         public string PtLastName { get; set;}
@@ -27,6 +27,6 @@ namespace DAL.ViewModels
         public string zipcode {  get; set; }
         public string state {  get; set; }
         public string room {  get; set; }
-        public string PtPhoneNo { get; set; }   
+        public string? PtPhoneNo { get; set; }   
     }
 }

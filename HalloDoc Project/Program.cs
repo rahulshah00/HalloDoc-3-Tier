@@ -11,8 +11,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>();
-builder.Services.AddScoped<IPatient_Request, Patient_RequestRepo>();
+builder.Services.AddScoped<IRequestRepo, RequestRepo>();
 builder.Services.AddScoped<IJwtToken, JwtTokenServices>();
+builder.Services.AddScoped<IEmailService, EmailServiceRepo>();
+
 
 //For Creating a session
 builder.Services.AddSession(options =>

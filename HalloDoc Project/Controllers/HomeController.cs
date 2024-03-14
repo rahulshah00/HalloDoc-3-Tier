@@ -26,13 +26,14 @@ namespace HalloDoc_Project.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _environment;
         private readonly IConfiguration _config;
-        private readonly IPatient_Request patient_Request;
-        public HomeController(ApplicationDbContext context, IWebHostEnvironment environment, IConfiguration config, IPatient_Request request)
+        private readonly IRequestRepo _patient_Request;
+
+        public HomeController(ApplicationDbContext context, IWebHostEnvironment environment, IConfiguration config, IRequestRepo request)
         {
             _context = context;
             _environment = environment;
             _config = config;
-            patient_Request = request;
+            _patient_Request = request;
         }
 
         public IActionResult Index()
@@ -48,7 +49,7 @@ namespace HalloDoc_Project.Controllers
         {
             return View();
         }
-        
+
         public IActionResult SelectedDownload()
         {
             return View();
@@ -59,157 +60,6 @@ namespace HalloDoc_Project.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult create_patient_request(PatientModel pm)
-        {
-            string path = _environment.WebRootPath;
-            if (ModelState.IsValid)
-            {
-                if (pm.Password != null)
-                {
-                    //var newvm=new PatientModel();
-                    Aspnetuser user = new Aspnetuser();
-                    Guid id = Guid.NewGuid();
-
-                    user.Id = id.ToString();
-                    user.Email = pm.Email;
-                    user.Passwordhash = GenerateSHA256(pm.Password);
-                    user.Phonenumber = pm.PhoneNo;
-                    user.Username = pm.FirstName;
-                    user.Createddate = DateTime.Now;
-                    _context.Aspnetusers.Add(user);
-                    _context.SaveChanges();
-
-                    //user.Modifieddate = DateTime.Now;
-
-                    User user_obj = new User();
-                    user_obj.Aspnetuserid = user.Id;
-                    user_obj.Firstname = pm.FirstName;
-                    user_obj.Lastname = pm.LastName;
-                    user_obj.Email = pm.Email;
-                    user_obj.Mobile = pm.PhoneNo;
-                    user_obj.Street = pm.Street;
-                    user_obj.City = pm.City;
-                    user_obj.State = pm.State;
-                    user_obj.Zipcode = pm.ZipCode;
-                    user_obj.Createddate = DateTime.Now;
-                    user_obj.Createdby = id.ToString();
-                    //user_obj.Modifiedby = null;
-                    _context.Users.Add(user_obj);
-                    _context.SaveChanges();
-
-
-
-                    Request request = new Request();
-                    //change the fname, lname , and contact detials acc to the requestor
-                    request.Requesttypeid = 2;
-                    request.Userid = user_obj.Userid;
-                    request.Firstname = pm.FirstName;
-                    request.Lastname = pm.LastName;
-                    request.Phonenumber = pm.PhoneNo;
-                    request.Email = pm.Email;
-                    request.Createddate = DateTime.Now;
-                    request.Patientaccountid = id.ToString();
-                    request.Status = 1;
-                    request.Createduserid = user_obj.Userid;
-                    _context.Requests.Add(request);
-                    _context.SaveChanges();
-
-                    Requestclient rc = new Requestclient();
-                    rc.Requestid = request.Requestid;
-                    rc.Firstname = pm.FirstName;
-                    rc.Lastname = pm.LastName;
-                    rc.Phonenumber = pm.PhoneNo;
-                    rc.Location = pm.City + pm.State;
-                    rc.Email = pm.Email;
-                    rc.Address = pm.RoomSuite + ", " + pm.Street + ", " + pm.City + ", " + pm.State + ", " + pm.ZipCode;
-                    rc.Street = pm.Street;
-                    rc.City = pm.City;
-                    rc.State = pm.State;
-                    rc.Zipcode = pm.ZipCode;
-                    rc.Notes = pm.Symptoms;
-
-                    _context.Requestclients.Add(rc);
-                    _context.SaveChanges();
-
-                    if (pm.File != null)
-                    {
-
-                        InsertRequestWiseFile(pm.File);
-                        Requestwisefile rwf = new()
-                        {
-                            Requestid = request.Requestid,
-                            Filename = pm.File.FileName,
-                            Createddate = DateTime.Now,
-                        };
-                        _context.Requestwisefiles.Add(rwf);
-                        _context.SaveChanges();
-                    }
-
-                    return RedirectToAction("create_patient_request", "Guest");
-                }
-                else
-                {
-
-                    User user_obj = _context.Users.FirstOrDefault(u => u.Email == pm.Email);
-
-                    Request request = new Request();
-                    //change the fname, lname , and contact detials acc to the requestor
-                    request.Requesttypeid = 2;
-                    request.Userid = user_obj.Userid;
-                    request.Firstname = pm.FirstName;
-                    request.Lastname = pm.LastName;
-                    request.Phonenumber = pm.PhoneNo;
-                    request.Email = pm.Email;
-                    request.Createddate = DateTime.Now;
-                    request.Patientaccountid = user_obj.Aspnetuserid;
-                    request.Status = 1;
-                    request.Createduserid = user_obj.Userid;
-                    _context.Requests.Add(request);
-                    _context.SaveChanges();
-
-                    Requestclient rc = new Requestclient();
-                    rc.Requestid = request.Requestid;
-                    rc.Firstname = pm.FirstName;
-                    rc.Lastname = pm.LastName;
-                    rc.Phonenumber = pm.PhoneNo;
-                    rc.Location = pm.City + pm.State;
-                    rc.Email = pm.Email;
-                    rc.Address = pm.RoomSuite + ", " + pm.Street + ", " + pm.City + ", " + pm.State + ", " + pm.ZipCode;
-                    rc.Street = pm.Street;
-                    rc.City = pm.City;
-                    rc.State = pm.State;
-                    rc.Zipcode = pm.ZipCode;
-                    rc.Notes = pm.Symptoms;
-
-                    _context.Requestclients.Add(rc);
-                    _context.SaveChanges();
-                    if (pm.File != null)
-                    {
-
-                        InsertRequestWiseFile(pm.File);
-                        Requestwisefile rwf = new()
-                        {
-                            Requestid = request.Requestid,
-                            Filename = pm.File.FileName,
-                            Createddate = DateTime.Now,
-                        };
-                        _context.Requestwisefiles.Add(rwf);
-                        _context.SaveChanges();
-                    }
-
-                    return RedirectToAction("create_patient_request", "Guest");
-                }
-
-            }
-
-
-            return View();
-
-
-        }
-
-        [HttpPost]
         public JsonResult CheckEmail(string email)
         {
             bool emailExists = _context.Users.Any(u => u.Email == email);
@@ -217,7 +67,7 @@ namespace HalloDoc_Project.Controllers
 
         }
 
-       
+
         public IActionResult PatientProfile()
         {
 
@@ -387,7 +237,7 @@ namespace HalloDoc_Project.Controllers
         {
             return View();
         }
-        
+
         public void InsertRequestWiseFile(IFormFile document)
         {
             string path = _environment.WebRootPath;
@@ -417,7 +267,7 @@ namespace HalloDoc_Project.Controllers
         [HttpPost]
         public IActionResult ViewDocuments(ViewDocumentsViewModel vm)
         {
-            if(vm.File!=null)
+            if (vm.File != null)
             {
                 InsertRequestWiseFile(vm.File);
                 Requestwisefile rwf = new()
@@ -428,7 +278,7 @@ namespace HalloDoc_Project.Controllers
                 };
                 _context.Requestwisefiles.Add(rwf);
                 _context.SaveChanges();
-            }        
+            }
             return ViewDocuments(vm.RequestID);
         }
         public IActionResult Business_Info()
@@ -484,7 +334,7 @@ namespace HalloDoc_Project.Controllers
             };
             _context.Requestclients.Add(rc);
             _context.SaveChanges();
-            return RedirectToAction("submit_request_page","Guest");
+            return RedirectToAction("submit_request_page", "Guest");
         }
 
         public IActionResult Concierge_info()
@@ -586,7 +436,7 @@ namespace HalloDoc_Project.Controllers
 
         [HttpPost]
         [AutoValidateAntiforgeryToken]
-        public IActionResult Friend_family(FamilyFriends fmfr)
+        public IActionResult Friend_family(FamilyFriendModel fmfr)
         {
             Request r = new()
             {
@@ -617,7 +467,7 @@ namespace HalloDoc_Project.Controllers
             _context.Requestclients.Add(rcl);
             _context.SaveChanges();
 
-            return RedirectToAction("submit_request_page","Guest");
+            return RedirectToAction("submit_request_page", "Guest");
         }
 
         public async Task<IActionResult> DownloadAllFiles(int requestId)
@@ -667,7 +517,7 @@ namespace HalloDoc_Project.Controllers
         public IActionResult logout()
         {
             HttpContext.Session.Clear();
-            return RedirectToAction("login_page","Guest");
+            return RedirectToAction("login_page", "Guest");
         }
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

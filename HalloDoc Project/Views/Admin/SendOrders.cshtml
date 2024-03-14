@@ -20,7 +20,7 @@
         <div class="row pt-3">
             <div class="col-md-6 col-12 temp form-floating mt-3">
                 <select class="form-select" asp-for="profession" id="SelectProfession">
-                    <option value="null" selected disabled>Select Profession</option>
+                    <option value="0" selected disabled>Select Profession</option>
                     @for(int i=0;i<Model.healthprofessionaltype.Count;i++)
                     {
                         <option value="@Model.healthprofessionaltype[i].Healthprofessionalid">@Model.healthprofessionaltype[i].Professionname</option>
@@ -42,17 +42,15 @@
                 <input type="text" asp-for="BusContact" id="Vencontact" class="form-control inputs border" placeholder="BusinessContact">
                 <label for="floatingInput" class="input_labels ms-2">Business Contact</label>
             </div>
-
             <div class="col-md-6 col-12 form-floating temp mt-3 ">
                 <input type="email" asp-for="BusEmail" id="Venemail" class="form-control inputs border" placeholder="Email">
                 <label for="floatingInput" class="input_labels ms-2">Email</label>
             </div>
             <div class="col-md-6 col-12 form-floating temp mt-3 ">
-                <input type="text" asp-for="FaxNo" id="VenFax" class="form-control inputs border" placeholder="Fax Number>
+                <input type="text" asp-for="FaxNo" id="VenFax" class="form-control inputs border" placeholder="Fax Number">
                 <label for="floatingInput" class="input_labels ms-2">Fax Number</label>
             </div>
         </div>
-
         <div class="row">
             <div class="mt-3 form-floating temp">
                 <textarea type="text-area" asp-for="prescription" class="form-control inputs" style="height: 125px;" placeholder="name@example.com"></textarea>
@@ -96,6 +94,14 @@
                     $("#Venemail").val('');
                     $("#VenFax").val('');
                     $('#SelectBusiness').empty();
+
+                    $('#SelectBusiness').append($('<option>', {
+                        value: 0,
+                        text: '-- Select Business --',
+                        selected: true,
+                        disabled: true
+                    }));
+
                     $.each(data, function (index, item) {
                         $('#SelectBusiness').append($('<option>').text(item.vendorname).attr('value', item.vendorid));
                     });
@@ -108,22 +114,27 @@
         var ProfessionId = $("#SelectProfession").val();
         filterVendorsByProfession(ProfessionId);
     });
-
+    </script>
+    <script>
     function getBusinessData(BusinessId) {
+        debugger;
         if (BusinessId != "0") {
             $.ajax({
                 type: "GET",
                 url: "/Admin/BusinessData",
                 data: { BusinessId: BusinessId },
 
-                success: function (data) {
-                                        
+                success: function (response) {
+                    $("#Vencontact").val(response.businesscontact);
+                    $("#Venemail").val(response.email);
+                    $("#VenFax").val(response.faxnumber);
                 }
+                
             });
         }
     }
     $("#SelectBusiness").on("change", function () {
         var BusinessId = $("#SelectBusiness").val();
-        filterVendorsByProfession(BusinessId);
+        getBusinessData(BusinessId);
     });
 </script>

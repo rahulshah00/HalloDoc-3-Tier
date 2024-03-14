@@ -3,19 +3,19 @@ using DAL.DataContext;
 using DAL.DataModels;
 using DAL.ViewModels;
 using Microsoft.AspNetCore.Http;
+using System;
 using System.Security.Cryptography;
 using System.Text;
 
 namespace BAL.Repository
 {
-    public class Patient_RequestRepo : IPatient_Request
+    public class RequestRepo : IRequestRepo
     {
         private readonly ApplicationDbContext _context;
-        public Patient_RequestRepo(ApplicationDbContext context)
+        public RequestRepo(ApplicationDbContext context)
         {
             _context = context;
         }
-
         public void insertfiles(IFormFile document,string _path)
         {
             string path = _path;
@@ -25,7 +25,6 @@ namespace BAL.Repository
             using FileStream stream = new(fullPath, FileMode.Create);
             document.CopyTo(stream);
         }
-
         public static string GenerateSHA256(string input)
         {
             var bytes = Encoding.UTF8.GetBytes(input);
@@ -41,8 +40,87 @@ namespace BAL.Repository
                 return sb.ToString();
             }
         }
+        public void FRequest(FamilyFriendModel fmfr)
+        {
+            Request r = new()
+            {
+                Requesttypeid = 3,
+                Firstname = fmfr.firstName,
+                Lastname = fmfr.lastName,
+                Phonenumber = fmfr.phone,
+                Email = fmfr.email,
+                Status = 1,
+                Createddate = DateTime.Now
+            };
+            _context.Requests.Add(r);
+            _context.SaveChanges();
+            Requestclient rcl = new()
+            {
+                Requestid = r.Requestid,
+                Firstname = fmfr.PatientModel.FirstName,
+                Lastname = fmfr.PatientModel.LastName,
+                Phonenumber = fmfr.PatientModel.PhoneNo,
+                Email = fmfr.PatientModel.Email,
+                Location = fmfr.PatientModel.City + fmfr.PatientModel.State,
+                City = fmfr.PatientModel.City,
+                State = fmfr.PatientModel.State,
+                Zipcode = fmfr.PatientModel.ZipCode
 
-        public void trial(PatientModel pm,string _path)
+            };
+
+            _context.Requestclients.Add(rcl);
+            _context.SaveChanges();
+        }
+        public void CRequest(ConciergeModel cm)
+        {
+            Concierge c = new()
+            {
+                Conciergename = cm.ConFirstName + cm.ConLastName,
+                Street = cm.ConStreet,
+                City = cm.ConCity,
+                State = cm.ConState,
+                Zipcode = cm.ConZipCode,
+                Createddate = DateTime.Now,
+
+            };
+            _context.Concierges.Add(c);
+            _context.SaveChanges();
+            Request req = new()
+            {
+                Requesttypeid = 4,
+                Firstname = cm.ConFirstName,
+                Lastname = cm.ConLastName,
+                Phonenumber = cm.ConPhoneNo,
+                Email = cm.ConEmail,
+                Status = 1,
+                Createddate = DateTime.Now,
+
+            };
+            _context.Requests.Add(req);
+            _context.SaveChanges();
+            Requestconcierge rc = new()
+            {
+                Requestid = req.Requestid,
+                Conciergeid = c.Conciergeid
+            };
+            _context.Requestconcierges.Add(rc);
+            _context.SaveChanges();
+            Requestclient rcl = new()
+            {
+                Requestid = req.Requestid,
+                Firstname = cm.PtFirstName,
+                Lastname = cm.PtLastName,
+                Phonenumber = cm.PtPhoneNo,
+                Email = cm.PtEmail,
+                Street = cm.ConStreet,
+                City = cm.ConCity,
+                State = cm.ConState,
+                Zipcode = cm.ConZipCode
+            };
+            _context.Requestclients.Add(rcl);
+            _context.SaveChanges();
+        }
+        public void PRequest(PatientModel pm,string _path)
         {
             if (pm.Password != null)
             {
@@ -124,6 +202,8 @@ namespace BAL.Repository
                     _context.Requestwisefiles.Add(rwf);
                     _context.SaveChanges();
                 }
+
+                //return true;
             }
             else
             {
@@ -172,9 +252,55 @@ namespace BAL.Repository
                     _context.Requestwisefiles.Add(rwf);
                     _context.SaveChanges();
                 }
-
+                //return false;
                 //return RedirectToAction("create_patient_request", "Home");
             }
+        }
+        public void BRequest(BusinessModel bm)
+        {
+            Business bus = new()
+            {
+                Name = bm.BusinessName,
+                Phonenumber = bm.BsPhoneNo,
+                Createddate = DateTime.Now
+            };
+            _context.Businesses.Add(bus);
+            _context.SaveChanges();
+
+            Request req = new()
+            {
+                Requesttypeid = 1,
+                Firstname = bm.BsFirstName,
+                Lastname = bm.BsLastName,
+                Phonenumber = bm.BsPhoneNo,
+                Email = bm.BsEmail,
+                Status = 1,
+                Createddate = DateTime.Now,
+            };
+            _context.Requests.Add(req);
+            _context.SaveChanges();
+            Requestbusiness ReqBus = new()
+            {
+                Requestid = req.Requestid,
+                Businessid = bus.Id,
+            };
+
+            _context.Requestbusinesses.Add(ReqBus);
+            _context.SaveChanges();
+
+            Requestclient rc = new()
+            {
+                Requestid = req.Requestid,
+                Firstname = bm.PtFirstName,
+                Lastname = bm.BsLastName,
+                Phonenumber = bm.BsPhoneNo,
+                Street = bm.Street,
+                City = bm.city,
+                State = bm.state,
+                Zipcode = bm.zipcode
+            };
+            _context.Requestclients.Add(rc);
+            _context.SaveChanges();
         }
     }
 }
