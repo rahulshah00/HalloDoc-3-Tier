@@ -14,7 +14,14 @@ builder.Services.AddDbContext<ApplicationDbContext>();
 builder.Services.AddScoped<IRequestRepo, RequestRepo>();
 builder.Services.AddScoped<IJwtToken, JwtTokenServices>();
 builder.Services.AddScoped<IEmailService, EmailServiceRepo>();
-
+builder.Services.AddScoped<IResetPasswordService,ResetPasswordServiceRepo>();
+builder.Services.AddScoped<IPasswordHasher, PasswordHasherRepo>();
+builder.Services.AddScoped<IFileOperations, FileOperationsRepo>();
+builder.Services.AddScoped<ILogin, LoginRepo>();
+builder.Services.AddScoped<IAgreement, AgreementRepo>();
+builder.Services.AddScoped<IAdminTables,AdminTablesRepo>();
+builder.Services.AddScoped<IAdminActions, AdminActionsRepo>();
+builder.Services.AddScoped<IPatientDashboard,PatientDashboardRepo>();
 
 //For Creating a session
 builder.Services.AddSession(options =>

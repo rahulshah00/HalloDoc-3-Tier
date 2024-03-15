@@ -24,12 +24,19 @@ namespace HalloDoc_Project.Controllers
         private readonly IWebHostEnvironment _environment;
         private readonly IConfiguration _config;
         private readonly IEmailService _emailService;
-        public AdminController(ApplicationDbContext context, IWebHostEnvironment environment, IConfiguration config, IEmailService emailService)
+        private readonly IAdminActions _adminActions;
+        private readonly IAdminTables _adminTables;
+        private readonly IFileOperations _fileOperations;
+        public AdminController(ApplicationDbContext context, IWebHostEnvironment environment, IConfiguration config, IEmailService emailService, IAdminTables adminTables, IAdminActions adminActions,IFileOperations fileOperations)
         {
             _context = context;
             _environment = environment;
             _config = config;
             _emailService = emailService;
+            _adminActions = adminActions;
+            _adminTables = adminTables;
+            _fileOperations = fileOperations;
+
         }
         public IActionResult Index()
         {
@@ -75,29 +82,16 @@ namespace HalloDoc_Project.Controllers
             Patient = 2,
             Physician = 3
         }
-
+        //Delete, DeleteAll, ViewUploads, SendOrders(Get) methods are not converted to three tier.
         public IActionResult ViewCase(int requestid)
         {
             if (ModelState.IsValid)
             {
-                Requestclient rc = _context.Requestclients.FirstOrDefault(x => x.Requestid == requestid);
-                ViewCaseViewModel vc = new()
-                {
-                    requestID = rc.Requestid,
-                    patientemail = rc.Email,
-                    patientfirstname = rc.Firstname,
-                    patientlastname = rc.Lastname,
-                    patientnotes = rc.Notes,
-                    patientphone = rc.Phonenumber,
-                    address = rc.Address,
-                    rooms = "N/A"
-                };
+                ViewCaseViewModel vc=_adminActions.ViewCaseAction(requestid);
                 return View(vc);
             }
             return View();
         }
-
-
         public ActionResult AssignCase()
         {
             return Ok();
@@ -118,27 +112,7 @@ namespace HalloDoc_Project.Controllers
         }
         public IActionResult AdminDBView()
         {
-            var adminRequests = (from r in _context.Requests
-                                 join rc in _context.Requestclients on r.Requestid equals rc.Requestid
-                                 select new AdminRequestsViewModel
-                                 {
-                                     Name = rc.Firstname + " " + rc.Lastname,
-                                     Requesteddate = r.Createddate,
-                                     Requestor = r.Firstname,
-                                     PhoneNo = rc.Phonenumber,
-                                     Address = rc.Address,
-                                     OtherPhoneNo = r.Phonenumber,
-                                     requestType = r.Requesttypeid,
-                                     email = rc.Email
-                                 }).ToList();
-
-            AdminRequestsViewModel arvm = new AdminRequestsViewModel();
-            AdminDashboardViewModel advm = new()
-            {
-                adminRequests = adminRequests,
-                Username = arvm.Name
-            };
-
+            AdminDashboardViewModel advm=_adminTables.AdminDashboardView();
             return View(advm);
         }
         public static string GetDOB(Requestclient reqcli)
@@ -153,158 +127,53 @@ namespace HalloDoc_Project.Controllers
 
             return dobdate;
         }
-
         public IActionResult Partners()
         {
             return View();
         }
-
         public IActionResult Profile()
         {
             return View();
         }
-
         public IActionResult ProviderLocation()
         {
             return View();
         }
-
         public IActionResult Providers()
         {
             return View();
         }
-
         public IActionResult Records()
         {
             return View();
         }
         public IActionResult AdminDashboard()
         {
-            List<Physician> physician = _context.Physicians.ToList();
-            List<Region> regions = _context.Regions.ToList();
-            List<Casetag> casetags = _context.Casetags.ToList();
-
-            AdminRequestsViewModel arvm = new AdminRequestsViewModel();
-            AdminDashboardViewModel advm = new()
-            {
-                physician = physician,
-                regions = regions,
-                casetags = casetags,
-                New = _context.Requests.Count(u => u.Status == 1),
-                active = _context.Requests.Count(u => u.Status == 4 || u.Status == 5),
-                pending = _context.Requests.Count(u => u.Status == 2),
-                conclude = _context.Requests.Count(u => u.Status == 6),
-                toclose = _context.Requests.Count(u => u.Status == 7 || u.Status == 3 || u.Status == 8),
-                unpaid = _context.Requests.Count(u => u.Status == 9),
-                Username = arvm.Name
-            };
+            AdminDashboardViewModel advm=_adminTables.AdminDashboard();
             return View(advm);
         }
         [HttpPost]
         public IActionResult AssignCase(int RequestId, string AssignPhysician, string AssignDescription)
         {
-            var user = _context.Requests.FirstOrDefault(h => h.Requestid == RequestId);
-            if (user != null)
-            {
-                user.Status = 2;
-                user.Modifieddate = DateTime.Now;
-                user.Physicianid = int.Parse(AssignPhysician);
-
-                _context.Update(user);
-                _context.SaveChanges();
-
-                Requeststatuslog requeststatuslog = new Requeststatuslog();
-
-                requeststatuslog.Requestid = RequestId;
-                requeststatuslog.Notes = AssignDescription;
-                requeststatuslog.Createddate = DateTime.Now;
-                requeststatuslog.Status = 2;
-
-                _context.Add(requeststatuslog);
-                _context.SaveChanges();
-            }
+            _adminActions.AssignCaseAction(RequestId,AssignPhysician,AssignDescription);
             return Ok();
         }
         [HttpPost]
         public ActionResult CancelCase(int requestid, string Reason, string Description)
         {
-            var user = _context.Requests.FirstOrDefault(h => h.Requestid == requestid);
-            if (user != null)
-            {
-                user.Status = 3;
-                user.Casetag = Reason;
-
-                Requeststatuslog requeststatuslog = new Requeststatuslog();
-
-                requeststatuslog.Requestid = requestid;
-                requeststatuslog.Notes = Description;
-                requeststatuslog.Createddate = DateTime.Now;
-                requeststatuslog.Status = 3;
-
-                _context.Add(requeststatuslog);
-                _context.SaveChanges();
-
-                _context.Update(user);
-                _context.SaveChanges();
-
-                return RedirectToAction("Admin_Dash");
-            }
+            _adminActions.CancelCaseAction(requestid,Reason,Description);
             return Ok();
         }
         [HttpPost]
         public IActionResult BlockCase(int requestid, string blocknotes)
         {
-            var user = _context.Requests.FirstOrDefault(u => u.Requestid == requestid);
-            if (user != null)
-            {
-                user.Status = 11;
-
-                _context.Update(user);
-                _context.SaveChanges();
-
-                Requeststatuslog requeststatuslog = new Requeststatuslog();
-
-                requeststatuslog.Requestid = requestid;
-                requeststatuslog.Notes = blocknotes ?? "--";
-                requeststatuslog.Createddate = DateTime.Now;
-                requeststatuslog.Status = 11;
-
-                _context.Add(requeststatuslog);
-                _context.SaveChanges();
-
-                Blockrequest blockRequest = new Blockrequest();
-
-                blockRequest.Requestid = requestid.ToString();
-                blockRequest.Createddate = DateTime.Now;
-                blockRequest.Email = user.Email;
-                blockRequest.Phonenumber = user.Phonenumber;
-                blockRequest.Reason = blocknotes ?? "--";
-            }
+            _adminActions.BlockCaseAction(requestid,blocknotes);
             return Ok();
         }
         [HttpPost]
         public IActionResult TransferCase(int RequestId, string TransferPhysician, string TransferDescription)
         {
-            var req = _context.Requests.FirstOrDefault(h => h.Requestid == RequestId);
-            if (req != null)
-            {
-                req.Status = 2;
-                req.Modifieddate = DateTime.Now;
-                req.Physicianid = int.Parse(TransferPhysician);
-
-                _context.Update(req);
-                _context.SaveChanges();
-
-                Requeststatuslog requeststatuslog = new Requeststatuslog();
-
-                requeststatuslog.Requestid = RequestId;
-                requeststatuslog.Notes = TransferDescription;
-                requeststatuslog.Createddate = DateTime.Now;
-                requeststatuslog.Status = 2;
-
-                _context.Add(requeststatuslog);
-                _context.SaveChanges();
-            }
+            _adminActions.TransferCase(RequestId,TransferPhysician,TransferDescription);    
             return Ok();
         }
         [HttpPost]
@@ -312,185 +181,46 @@ namespace HalloDoc_Project.Controllers
         {
             string AdminEmail = HttpContext.Session.GetString("Email");
             //Admin admin = _context.Admins.GetFirstOrDefault(a => a.Email == AdminEmail);
-
-            try
-            {
-                Request req = _context.Requests.FirstOrDefault(req => req.Requestid == requestid);
-
-                req.Modifieddate = DateTime.Now;
-
-
-
-                Requeststatuslog reqStatusLog = new Requeststatuslog()
-                {
-                    Requestid = requestid,
-                    Status = (short)RequestStatus.Clear,
-                    //Adminid = admins.Adminid,
-                    Notes = "Admin cleared this request",
-                    Createddate = DateTime.Now,
-                };
-
-                req.Status = (short)RequestStatus.Clear;
-                req.Modifieddate = DateTime.Now;
-
-
-                _context.Requests.Update(req);
-                _context.SaveChanges();
-
-                _context.Requeststatuslogs.Add(reqStatusLog);
-                _context.SaveChanges();
-
-                TempData["success"] = "Request Successfully transferred";
-                return true;
-            }
-            catch (Exception ex)
-            {
-                TempData["error"] = "Error Occured while transferring request.";
-                return false;
-            }
-
+            return _adminActions.ClearCaseModal(requestid);
         }
-
         [HttpPost]
         public IActionResult NewTable()
         {
-            var adminRequests = (from r in _context.Requests
-                                 join rc in _context.Requestclients on r.Requestid equals rc.Requestid
-                                 select new AdminRequestsViewModel
-                                 {
-                                     requestid = r.Requestid,
-                                     Name = rc.Firstname + " " + rc.Lastname,
-                                     Requesteddate = r.Createddate,
-                                     Requestor = r.Firstname,
-                                     PhoneNo = rc.Phonenumber,
-                                     Address = rc.Address,
-                                     OtherPhoneNo = r.Phonenumber,
-                                     requestType = r.Requesttypeid,
-                                     status = r.Status
-                                 }).Where(x => x.status == 1).ToList();
-
-            AdminDashboardViewModel model = new AdminDashboardViewModel()
-            {
-                adminRequests = adminRequests,
-            };
-
+            AdminDashboardViewModel model = _adminTables.GetNewTable();
             return PartialView("NewTable", model);
         }
         [HttpPost]
         public IActionResult ActiveTable()
         {
-            var adminRequests = (from r in _context.Requests
-                                 join rc in _context.Requestclients on r.Requestid equals rc.Requestid
-                                 select new AdminRequestsViewModel
-                                 {
-                                     requestid = r.Requestid,
-                                     Name = rc.Firstname + " " + rc.Lastname,
-                                     Requestor = r.Firstname,
-                                     PhoneNo = rc.Phonenumber,
-                                     Address = rc.Address,
-                                     OtherPhoneNo = r.Phonenumber,
-                                     requestType = r.Requesttypeid,
-                                     status = r.Status,
-                                     physicianName = "Dr.XYZ",
-                                     servicedate = DateOnly.Parse("22-12-2022")
-                                 }
-                                ).Where(x => x.status == 4 || x.status == 5).ToList();
-            AdminDashboardViewModel model = new AdminDashboardViewModel()
-            {
-                adminRequests = adminRequests,
-            };
-
+            AdminDashboardViewModel model = _adminTables.GetActiveTable();
             return PartialView("ActiveTable", model);
         }
-
         [HttpPost]
         public IActionResult PendingTable()
         {
-            var adminRequests = (from r in _context.Requests
-                                 join rc in _context.Requestclients on r.Requestid equals rc.Requestid
-                                 select new AdminRequestsViewModel
-                                 {
-                                     requestid = r.Requestid,
-                                     Name = rc.Firstname + " " + rc.Lastname,
-                                     Requestor = r.Firstname,
-                                     PhoneNo = rc.Phonenumber,
-                                     Address = rc.Address,
-                                     OtherPhoneNo = r.Phonenumber,
-                                     requestType = r.Requesttypeid,
-                                     status = r.Status,
-                                     physicianName = "Dr.XYZ",
-                                     servicedate = DateOnly.Parse("22-12-2022"),
-                                     email = rc.Email
-                                 }
-                                ).Where(x => x.status == 2).ToList();
-
-            AdminDashboardViewModel model = new AdminDashboardViewModel()
-            {
-
-                adminRequests = adminRequests,
-            };
+            AdminDashboardViewModel model = _adminTables.GetPendingTable();
             return PartialView("PendingTable", model);
         }
         [HttpPost]
         public IActionResult ConcludeTable()
         {
-            var adminRequests = (from r in _context.Requests
-                                 join rc in _context.Requestclients on r.Requestid equals rc.Requestid
-                                 select new AdminRequestsViewModel
-                                 {
-                                     requestid = r.Requestid,
-                                     Name = rc.Firstname + " " + rc.Lastname,
-                                     Requestor = r.Firstname,
-                                     PhoneNo = rc.Phonenumber,
-                                     Address = rc.Address,
-                                     OtherPhoneNo = r.Phonenumber,
-                                     requestType = r.Requesttypeid,
-                                     status = r.Status,
-                                     physicianName = "Dr.XYZ",
-                                     servicedate = DateOnly.Parse("22-12-2022"),
-                                     email = rc.Email
-
-                                 }
-                                ).Where(x => x.status == 6).ToList();
-            AdminDashboardViewModel model = new AdminDashboardViewModel()
-            {
-
-                adminRequests = adminRequests,
-            };
-
+            AdminDashboardViewModel model = _adminTables.GetConcludeTable();
             return PartialView("ConcludeTable", model);
         }
         [HttpPost]
         public IActionResult ToCloseTable()
         {
-            var adminRequests = (from r in _context.Requests
-                                 join rc in _context.Requestclients on r.Requestid equals rc.Requestid
-                                 select new AdminRequestsViewModel
-                                 {
-                                     requestid = r.Requestid,
-                                     Name = rc.Firstname + " " + rc.Lastname,
-                                     Requestor = r.Firstname,
-                                     PhoneNo = rc.Phonenumber,
-                                     Address = rc.Address,
-                                     OtherPhoneNo = r.Phonenumber,
-                                     requestType = r.Requesttypeid,
-                                     status = r.Status,
-                                     physicianName = "Dr.XYZ",
-                                     servicedate = DateOnly.Parse("22-12-2022"),
-                                     email = rc.Email
-
-                                 }
-                                ).Where(x => x.status == 3 || x.status == 7 || x.status == 8).ToList();
-            AdminDashboardViewModel model = new AdminDashboardViewModel()
-            {
-                adminRequests = adminRequests,
-            };
-
+            AdminDashboardViewModel model = _adminTables.GetToCloseTable();
             return PartialView("ToCloseTable", model);
+        }
+        [HttpPost]
+        public IActionResult UnpaidTable()
+        {
+            AdminDashboardViewModel model = _adminTables.GetUnpaidTable();
+            return PartialView("UnpaidTable", model);
         }
         public IActionResult DeleteFile(int fileid, int requestid)
         {
-
             var fileRequest = _context.Requestwisefiles.FirstOrDefault(x => x.Requestwisefileid == fileid);
             fileRequest.Isdeleted = true;
 
@@ -499,7 +229,6 @@ namespace HalloDoc_Project.Controllers
 
             return RedirectToAction("ViewUploads", new { requestid = requestid });
         }
-
         public IActionResult DeleteAllFiles(int requestid)
         {
             var request = _context.Requestwisefiles.Where(r => r.Requestid == requestid && r.Isdeleted != true).ToList();
@@ -510,15 +239,6 @@ namespace HalloDoc_Project.Controllers
             }
             _context.SaveChanges();
             return RedirectToAction("ViewUploads", new { requestid = requestid });
-        }
-        public void InsertRequestWiseFile(IFormFile document, String uniqueID)
-        {
-            string path = _environment.WebRootPath;
-            string filePath = "Content/" + uniqueID + "$" + document.FileName;
-            string fullPath = Path.Combine(path, filePath);
-
-            using FileStream stream = new(fullPath, FileMode.Create);
-            document.CopyTo(stream);
         }
         public IActionResult ViewUploads(int requestid)
         {
@@ -541,44 +261,19 @@ namespace HalloDoc_Project.Controllers
             var path = _environment.WebRootPath;
             return SendMail(requestid, path);
         }
-        public IActionResult SendMail(int requestid,string path)
+        public IActionResult SendMail(int requestid, string path)
         {
             _emailService.SendEmailWithAttachments(requestid, path);
-            return RedirectToAction("ViewUploads","Admin");
-        }
-        public IActionResult ReviewAgreement(int ReqId)
-        {
-            return View();
+            return RedirectToAction("ViewUploads", "Admin");
         }
         [HttpPost]
-        public IActionResult AcceptAgreement()
-        {
-            return View();
-        }
-        [HttpPost]
-        public IActionResult SendAgreement(int RequestId,string PhoneNo,string email)
+        public IActionResult SendAgreement(int RequestId, string PhoneNo, string email)
         {
             if (ModelState.IsValid)
             {
-                var AgreementLink = Url.Action("ReviewAgreement", "Guest", new {ReqId=RequestId}, Request.Scheme);
+                var AgreementLink = Url.Action("ReviewAgreement", "Guest", new { ReqId = RequestId }, Request.Scheme);
                 //----------------------------------
-                var smtpClient = new SmtpClient("smtp.office365.com")
-                {
-                    Port = 587,
-                    Credentials = new NetworkCredential("tatva.dotnet.rahulshah@outlook.com", "@08RahulTatvA"),
-                    EnableSsl = true,
-                    DeliveryMethod = SmtpDeliveryMethod.Network,
-                    UseDefaultCredentials = false
-                };
-                var mailMessage = new MailMessage
-                {
-                    From = new MailAddress("tatva.dotnet.rahulshah@outlook.com"),
-                    Subject = "Subject",
-                    Body = "<h1>Hello , Good morning!!</h1><a href=\"" + AgreementLink + "\" >Reset your password</a>",
-                    IsBodyHtml = true
-                };
-                mailMessage.To.Add(email);
-                smtpClient.Send(mailMessage);
+                _emailService.SendAgreementLink(RequestId, AgreementLink, email);
                 return RedirectToAction("AdminDashboard", "Guest");
             }
             return View();
@@ -594,7 +289,8 @@ namespace HalloDoc_Project.Controllers
             if (uploads.File != null)
             {
                 var uniqueid = Guid.NewGuid().ToString();
-                InsertRequestWiseFile(uploads.File, uniqueid);
+                var path = _environment.WebRootPath;
+                _fileOperations.insertfilesunique(uploads.File, uniqueid,path);
 
                 var filestring = Path.GetFileNameWithoutExtension(uploads.File.FileName);
                 var extensionstring = Path.GetExtension(uploads.File.FileName);
@@ -611,32 +307,20 @@ namespace HalloDoc_Project.Controllers
         }
         public IActionResult SendOrders(int requestid)
         {
-            List<Healthprofessional> healthprofessionals = _context.Healthprofessionals.ToList();  
-            List<Healthprofessionaltype> healthprofessionaltypes= _context.Healthprofessionaltypes.ToList();
+            List<Healthprofessional> healthprofessionals = _context.Healthprofessionals.ToList();
+            List<Healthprofessionaltype> healthprofessionaltypes = _context.Healthprofessionaltypes.ToList();
             SendOrderViewModel model = new SendOrderViewModel()
             {
                 requestid = requestid,
-                healthprofessionals=healthprofessionals,
-                healthprofessionaltype=healthprofessionaltypes
+                healthprofessionals = healthprofessionals,
+                healthprofessionaltype = healthprofessionaltypes
             };
             return View(model);
         }
         [HttpPost]
         public IActionResult SendOrders(int requestid, SendOrderViewModel sendOrder)
         {
-            Orderdetail Order = new()
-            {
-                Requestid = requestid,
-                Faxnumber = sendOrder.FaxNo,
-                Email = sendOrder.BusEmail,
-                Businesscontact = sendOrder.BusContact,
-                Prescription = sendOrder.prescription,
-                Noofrefill = sendOrder.RefillCount,
-                Createddate = DateTime.Now,
-                Vendorid = 1
-            };
-            _context.Add(Order);
-            _context.SaveChanges();
+            _adminActions.SendOrderAction(requestid, sendOrder);
             return SendOrders(requestid);
         }
         public List<Healthprofessional> filterVenByPro(string ProfessionId)
@@ -644,32 +328,5 @@ namespace HalloDoc_Project.Controllers
             var result = _context.Healthprofessionals.Where(u => u.Profession == int.Parse(ProfessionId)).ToList();
             return result;
         }
-
-        [HttpPost]
-        public IActionResult UnpaidTable()
-        {
-            var adminRequests = (from r in _context.Requests
-                                 join rc in _context.Requestclients on r.Requestid equals rc.Requestid
-                                 select new AdminRequestsViewModel
-                                 {
-                                     Name = rc.Firstname + " " + rc.Lastname,
-                                     Requestor = r.Firstname,
-                                     PhoneNo = rc.Phonenumber,
-                                     Address = rc.Address,
-                                     OtherPhoneNo = r.Phonenumber,
-                                     requestType = r.Requesttypeid,
-                                     status = r.Status,
-                                     physicianName = "Dr.XYZ",
-                                     servicedate = DateOnly.Parse("22-12-2022"),
-                                     email = rc.Email
-                                 }
-                                ).Where(x => x.status == 9).ToList();
-            AdminDashboardViewModel model = new AdminDashboardViewModel()
-            {
-                adminRequests = adminRequests,
-            };
-            return PartialView("UnpaidTable", model);
-        }
     }
 }
-

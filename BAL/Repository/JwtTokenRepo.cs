@@ -44,12 +44,10 @@ namespace BAL.Repository
         public bool ValidateToken(string token, out JwtSecurityToken jwtSecurityToken)
         {
             jwtSecurityToken = null;
-
             if (token == null)
             {
                 return false;
             }
-
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_config["Jwt:Key"]);
             try
@@ -71,7 +69,6 @@ namespace BAL.Repository
                 if (jwtSecurityToken != null)
                     return true;
                 return false;
-
             }
             catch (Exception ex)
             {

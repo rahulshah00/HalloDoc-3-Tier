@@ -21,74 +21,32 @@ namespace HalloDoc_Project.Controllers
         private readonly IConfiguration _config;
         private readonly IRequestRepo _patient_Request;
         private readonly IJwtToken _jwtToken;
-
-        public GuestController(ApplicationDbContext context, IWebHostEnvironment environment, IConfiguration config, IRequestRepo request, IJwtToken token)
+        private readonly IResetPasswordService _resetPasswordService;
+        private readonly IEmailService _emailService;
+        private readonly IPasswordHasher _passwordHasher;
+        private readonly IAgreement _agreement;
+        public GuestController(ApplicationDbContext context, IWebHostEnvironment environment, IConfiguration config, IRequestRepo request, IJwtToken token, IResetPasswordService resetPasswordService, IEmailService emailService, IPasswordHasher passwordHasher, IAgreement agreement)
         {
             _context = context;
             _environment = environment;
             _config = config;
             _patient_Request = request;
             _jwtToken = token;
+            _resetPasswordService = resetPasswordService;
+            _emailService = emailService;
+            _passwordHasher = passwordHasher;
+            _agreement = agreement;
         }
-        public static string GenerateSHA256(string input)
-        {
-            var bytes = Encoding.UTF8.GetBytes(input);
-            using (var hashEngine = SHA256.Create())
-            {
-                var hashedBytes = hashEngine.ComputeHash(bytes, 0, bytes.Length);
-                var sb = new StringBuilder();
-                foreach (var b in hashedBytes)
-                {
-                    var hex = b.ToString("x2");
-                    sb.Append(hex);
-                }
-                return sb.ToString();
-            }
-        }
+        //Only ResetPassword is not taken into the three tier architecture otherwise everything from GuestController is in three tier architecture.
         public IActionResult Agree(int Requestid)
         {
-            Request req = _context.Requests.FirstOrDefault(x => x.Requestid == Requestid);
-
-            req.Status = 4;
-            req.Modifieddate = DateTime.Now;
-
-            _context.Update(req);
-            _context.SaveChanges();
-
-            Requeststatuslog requeststatuslog = new Requeststatuslog();
-
-            requeststatuslog.Requestid = Requestid;
-            requeststatuslog.Notes = "Agreement Accepted";
-            requeststatuslog.Createddate = DateTime.Now;
-            requeststatuslog.Status = 4;
-
-            _context.Add(requeststatuslog);
-            _context.SaveChanges();
-
+            _agreement.AgreementAccepted(Requestid);
             return RedirectToAction("login_page", "Guest");
         }
         public IActionResult CancelAgreement(int Requestid, string Notes)
         {
-            Request req = _context.Requests.FirstOrDefault(x => x.Requestid == Requestid);
-
-            req.Status = 7;
-            req.Modifieddate = DateTime.Now;
-
-            _context.Update(req);
-            _context.SaveChanges();
-
-            Requeststatuslog requeststatuslog = new Requeststatuslog();
-
-            requeststatuslog.Requestid = Requestid;
-            requeststatuslog.Notes = Notes;
-            requeststatuslog.Createddate = DateTime.Now;
-            requeststatuslog.Status = 7;
-
-            _context.Add(requeststatuslog);
-            _context.SaveChanges();
-
+            _agreement.AgreementRejected(Requestid, Notes);
             return RedirectToAction("login_page", "Guest");
-
         }
         public IActionResult ReviewAgreement(int ReqId)
         {
@@ -103,7 +61,6 @@ namespace HalloDoc_Project.Controllers
                 return View(reviewmodel);
             }
             return RedirectToAction("submit_request_page");
-
         }
         public IActionResult Index()
         {
@@ -117,7 +74,6 @@ namespace HalloDoc_Project.Controllers
         {
             return View();
         }
-
         public IActionResult patient_submit_request_screen()
         {
             return View();
@@ -146,7 +102,7 @@ namespace HalloDoc_Project.Controllers
         [AutoValidateAntiforgeryToken]
         public IActionResult Concierge_info(ConciergeModel cm)
         {
-            if(ModelState.IsValid)
+            if (ModelState.IsValid)
             {
                 _patient_Request.CRequest(cm);
             }
@@ -182,13 +138,8 @@ namespace HalloDoc_Project.Controllers
                 _patient_Request.PRequest(pm, path);
                 return RedirectToAction("create_patient_request", "Guest");
             }
-
-
             return View();
-
-
         }
-        
         public IActionResult login_page()
         {
             return View();
@@ -197,8 +148,7 @@ namespace HalloDoc_Project.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult login_page(Aspnetuser demouser)
         {
-
-            var password = GenerateSHA256(demouser.Passwordhash);
+            var password = _passwordHasher.GenerateSHA256(demouser.Passwordhash);
             Aspnetuser v = _context.Aspnetusers.FirstOrDefault(dt => dt.Username == demouser.Username && dt.Passwordhash == password);
             if (v != null)
             {
@@ -215,34 +165,30 @@ namespace HalloDoc_Project.Controllers
         {
             return View();
         }
+        [HttpPost]
+        [AutoValidateAntiforgeryToken]
+        public IActionResult forgot_password_page(ForgotPasswordViewModel fvm)
+        {
+            if (ModelState.IsValid)
+            {
+                var jwtToken = _resetPasswordService.GenerateJWTTokenForPassword(fvm);
+                var resetLink = Url.Action("ResetPassword", "Guest", new { token = jwtToken }, Request.Scheme);
+                _emailService.SendEmailForPasswordReset(fvm, resetLink);
+                return RedirectToAction("login_page", "Guest");
+            }
+            return View();
+        }
         [HttpGet]
         public ActionResult ResetPassword(string token)
         {
             // 4. In the MVC controller, create an action method to handle the password reset request
             try
             {
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.ASCII.GetBytes(_config["Jwt:Key"]);
-                // 5. Verify the JWT token and allow the user to reset the password if the token is valid
-                tokenHandler.ValidateToken(token, new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = true,
-                    ValidateLifetime = true,
-                    ValidateAudience = false,
-                    ValidIssuer = _config["Jwt:Issuer"],
-                    ClockSkew = TimeSpan.Zero
-                }, out SecurityToken validatedToken);
-
-                var jwtToken = (JwtSecurityToken)validatedToken;
-                var email = jwtToken.Claims.First(x => x.Type == "email").Value;
-
+                string emailid = _resetPasswordService.ValidateToken(token);
                 ResetPasswordViewModel rpvm = new ResetPasswordViewModel()
                 {
-                    email = email
+                    email = emailid
                 };
-
                 return View(rpvm);
             }
             catch (Exception ex)
@@ -256,7 +202,7 @@ namespace HalloDoc_Project.Controllers
             Aspnetuser aspnetuser = _context.Aspnetusers.FirstOrDefault(u => u.Email == rpvm.email);
             if (rpvm.password == rpvm.confirmpassword)
             {
-                aspnetuser.Passwordhash = GenerateSHA256(rpvm.password);
+                aspnetuser.Passwordhash = _passwordHasher.GenerateSHA256(rpvm.password);
                 aspnetuser.Modifieddate = DateTime.Now;
                 _context.Aspnetusers.Update(aspnetuser);
                 _context.SaveChanges();
@@ -267,52 +213,7 @@ namespace HalloDoc_Project.Controllers
                 return View("Error");
             }
         }
-        [HttpPost]
-        [AutoValidateAntiforgeryToken]
-        public IActionResult forgot_password_page(ForgotPasswordViewModel fvm)
-        {
-            if (ModelState.IsValid)
-            {
 
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.ASCII.GetBytes(_config["Jwt:Key"]);
-                var tokenDescriptor = new SecurityTokenDescriptor
-                {
-                    Subject = new ClaimsIdentity(new[] { new Claim("email", fvm.email) }),
-                    Expires = DateTime.UtcNow.AddHours(24),
-                    Issuer = _config["Jwt:Issuer"],
-                    //Audience = _audience,
-                    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-                };
-                var token = tokenHandler.CreateToken(tokenDescriptor);
-                var jwtToken = tokenHandler.WriteToken(token);
-
-                var resetLink = Url.Action("ResetPassword", "Home", new { token = jwtToken }, Request.Scheme);
-
-                //----------------------------------
-
-                var smtpClient = new SmtpClient("smtp.office365.com")
-                {
-                    Port = 587,
-                    Credentials = new NetworkCredential("tatva.dotnet.rahulshah@outlook.com", "@08RahulTatvA"),
-                    EnableSsl = true,
-                    DeliveryMethod = SmtpDeliveryMethod.Network,
-                    UseDefaultCredentials = false
-                };
-                //smtpClient.Send("tatva.dotnet.rahulshah@outlook.com", "rahul0810shah@gmail.com", "This is a trial email for smtpClient.", "this is token ->" + resetLink);
-                var mailMessage = new MailMessage
-                {
-                    From = new MailAddress("tatva.dotnet.rahulshah@outlook.com"),
-                    Subject = "Subject",
-                    Body = "<h1>Hello , Good morning!!</h1><a href=\"" + resetLink + "\" >Reset your password</a>",
-                    IsBodyHtml = true
-                };
-                mailMessage.To.Add(fvm.email);
-                smtpClient.Send(mailMessage);
-                return RedirectToAction("login_page", "Guest");
-            }
-            return View();
-        }
     }
 
 }

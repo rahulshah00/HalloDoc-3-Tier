@@ -12,34 +12,15 @@ namespace BAL.Repository
     public class RequestRepo : IRequestRepo
     {
         private readonly ApplicationDbContext _context;
-        public RequestRepo(ApplicationDbContext context)
+        private readonly IPasswordHasher _passwordHasher;
+        private readonly IFileOperations _insertfiles;
+        public RequestRepo(ApplicationDbContext context, IPasswordHasher passwordHasher, IFileOperations insertfiles)
         {
             _context = context;
+            _passwordHasher = passwordHasher;
+            _insertfiles = insertfiles;
         }
-        public void insertfiles(IFormFile document,string _path)
-        {
-            string path = _path;
-            string filePath = "Content/" + document.FileName;
-            string fullPath = Path.Combine(path, filePath);
-
-            using FileStream stream = new(fullPath, FileMode.Create);
-            document.CopyTo(stream);
-        }
-        public static string GenerateSHA256(string input)
-        {
-            var bytes = Encoding.UTF8.GetBytes(input);
-            using (var hashEngine = SHA256.Create())
-            {
-                var hashedBytes = hashEngine.ComputeHash(bytes, 0, bytes.Length);
-                var sb = new StringBuilder();
-                foreach (var b in hashedBytes)
-                {
-                    var hex = b.ToString("x2");
-                    sb.Append(hex);
-                }
-                return sb.ToString();
-            }
-        }
+        
         public void FRequest(FamilyFriendModel fmfr)
         {
             Request r = new()
@@ -120,8 +101,9 @@ namespace BAL.Repository
             _context.Requestclients.Add(rcl);
             _context.SaveChanges();
         }
-        public void PRequest(PatientModel pm,string _path)
+        public void PRequest(PatientModel pm, string _path)
         {
+            
             if (pm.Password != null)
             {
                 //var newvm=new PatientModel();
@@ -130,14 +112,12 @@ namespace BAL.Repository
                 string id = Guid.NewGuid().ToString();
                 user.Id = id;
                 user.Email = pm.Email;
-                user.Passwordhash = GenerateSHA256(pm.Password);
+                user.Passwordhash = _passwordHasher.GenerateSHA256(pm.Password);
                 user.Phonenumber = pm.PhoneNo;
                 user.Username = pm.FirstName;
                 user.Createddate = DateTime.Now;
                 _context.Aspnetusers.Add(user);
                 _context.SaveChanges();
-
-                //user.Modifieddate = DateTime.Now;
 
                 User user_obj = new User();
                 user_obj.Aspnetuserid = user.Id;
@@ -151,7 +131,6 @@ namespace BAL.Repository
                 user_obj.Zipcode = pm.ZipCode;
                 user_obj.Createddate = DateTime.Now;
                 user_obj.Createdby = id;
-                //user_obj.Modifiedby = null;
                 _context.Users.Add(user_obj);
                 _context.SaveChanges();
 
@@ -191,8 +170,11 @@ namespace BAL.Repository
 
                 if (pm.File != null)
                 {
+                    //Guid myuuid = Guid.NewGuid();
+                    //var filename = Path.GetFileName(model.File.FileName);
+                    //var FinalFileName = $"{myuuid.ToString()}*{filename}";
 
-                    insertfiles(pm.File,_path);
+                    _insertfiles.insertfiles(pm.File, _path);
                     Requestwisefile rwf = new()
                     {
                         Requestid = request.Requestid,
@@ -202,8 +184,6 @@ namespace BAL.Repository
                     _context.Requestwisefiles.Add(rwf);
                     _context.SaveChanges();
                 }
-
-                //return true;
             }
             else
             {
@@ -242,7 +222,7 @@ namespace BAL.Repository
                 if (pm.File != null)
                 {
 
-                    insertfiles(pm.File, _path);
+                    _insertfiles.insertfiles(pm.File, _path);
                     Requestwisefile rwf = new()
                     {
                         Requestid = request.Requestid,
@@ -252,8 +232,6 @@ namespace BAL.Repository
                     _context.Requestwisefiles.Add(rwf);
                     _context.SaveChanges();
                 }
-                //return false;
-                //return RedirectToAction("create_patient_request", "Home");
             }
         }
         public void BRequest(BusinessModel bm)

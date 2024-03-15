@@ -8,6 +8,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using DAL.DataContext;
+using DAL.ViewModels;
 
 namespace BAL.Repository
 {
@@ -18,6 +19,28 @@ namespace BAL.Repository
         {
             _context = context;
         }
+        public void SendEmailForPasswordReset(ForgotPasswordViewModel fvm,string ResetLink)
+        {
+            var smtpClient = new SmtpClient("smtp.office365.com")
+            {
+                Port = 587,
+                Credentials = new NetworkCredential("tatva.dotnet.rahulshah@outlook.com", "@08RahulTatvA"),
+                EnableSsl = true,
+                DeliveryMethod = SmtpDeliveryMethod.Network,
+                UseDefaultCredentials = false
+            };
+
+            var mailMessage = new MailMessage
+            {
+                From = new MailAddress("tatva.dotnet.rahulshah@outlook.com"),
+                Subject = "Subject",
+                Body = "<h1>Hello , Good morning!!</h1><a href=\"" + ResetLink + "\" >Reset your password</a>",
+                IsBodyHtml = true
+            };
+            mailMessage.To.Add(fvm.email);
+            smtpClient.Send(mailMessage);
+        }
+
         public void SendEmailWithAttachments(int requestid,string path)
         {
             var smtpClient = new SmtpClient("smtp.office365.com")
@@ -50,6 +73,27 @@ namespace BAL.Repository
             var user = _context.Requests.FirstOrDefault(r => r.Requestid == requestid);
 
             mailMessage.To.Add(user.Email);
+            smtpClient.Send(mailMessage);
+        }
+
+        public void SendAgreementLink(int requestid, string link,string email)
+        {
+            var smtpClient = new SmtpClient("smtp.office365.com")
+            {
+                Port = 587,
+                Credentials = new NetworkCredential("tatva.dotnet.rahulshah@outlook.com", "@08RahulTatvA"),
+                EnableSsl = true,
+                DeliveryMethod = SmtpDeliveryMethod.Network,
+                UseDefaultCredentials = false
+            };
+            var mailMessage = new MailMessage
+            {
+                From = new MailAddress("tatva.dotnet.rahulshah@outlook.com"),
+                Subject = "Subject",
+                Body = "<p>Hello, we have attached a link to the agreement that need to accepted before moving forward to the treatment procedure.</p><a href=\"" + link + "\" >Agreement Link</a>",
+                IsBodyHtml = true
+            };
+            mailMessage.To.Add(email);
             smtpClient.Send(mailMessage);
         }
     }
