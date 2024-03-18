@@ -27,7 +27,8 @@ namespace HalloDoc_Project.Controllers
         private readonly IAdminActions _adminActions;
         private readonly IAdminTables _adminTables;
         private readonly IFileOperations _fileOperations;
-        public AdminController(ApplicationDbContext context, IWebHostEnvironment environment, IConfiguration config, IEmailService emailService, IAdminTables adminTables, IAdminActions adminActions,IFileOperations fileOperations)
+        private readonly IEncounterForm _encounterForm;
+        public AdminController(ApplicationDbContext context, IWebHostEnvironment environment, IConfiguration config, IEmailService emailService, IAdminTables adminTables, IAdminActions adminActions, IFileOperations fileOperations, IEncounterForm encounterForm)
         {
             _context = context;
             _environment = environment;
@@ -36,7 +37,7 @@ namespace HalloDoc_Project.Controllers
             _adminActions = adminActions;
             _adminTables = adminTables;
             _fileOperations = fileOperations;
-
+            _encounterForm = encounterForm;
         }
         public IActionResult Index()
         {
@@ -87,7 +88,7 @@ namespace HalloDoc_Project.Controllers
         {
             if (ModelState.IsValid)
             {
-                ViewCaseViewModel vc=_adminActions.ViewCaseAction(requestid);
+                ViewCaseViewModel vc = _adminActions.ViewCaseAction(requestid);
                 return View(vc);
             }
             return View();
@@ -112,7 +113,7 @@ namespace HalloDoc_Project.Controllers
         }
         public IActionResult AdminDBView()
         {
-            AdminDashboardViewModel advm=_adminTables.AdminDashboardView();
+            AdminDashboardViewModel advm = _adminTables.AdminDashboardView();
             return View(advm);
         }
         public static string GetDOB(Requestclient reqcli)
@@ -149,31 +150,31 @@ namespace HalloDoc_Project.Controllers
         }
         public IActionResult AdminDashboard()
         {
-            AdminDashboardViewModel advm=_adminTables.AdminDashboard();
+            AdminDashboardViewModel advm = _adminTables.AdminDashboard();
             return View(advm);
         }
         [HttpPost]
         public IActionResult AssignCase(int RequestId, string AssignPhysician, string AssignDescription)
         {
-            _adminActions.AssignCaseAction(RequestId,AssignPhysician,AssignDescription);
+            _adminActions.AssignCaseAction(RequestId, AssignPhysician, AssignDescription);
             return Ok();
         }
         [HttpPost]
         public ActionResult CancelCase(int requestid, string Reason, string Description)
         {
-            _adminActions.CancelCaseAction(requestid,Reason,Description);
+            _adminActions.CancelCaseAction(requestid, Reason, Description);
             return Ok();
         }
         [HttpPost]
         public IActionResult BlockCase(int requestid, string blocknotes)
         {
-            _adminActions.BlockCaseAction(requestid,blocknotes);
+            _adminActions.BlockCaseAction(requestid, blocknotes);
             return Ok();
         }
         [HttpPost]
         public IActionResult TransferCase(int RequestId, string TransferPhysician, string TransferDescription)
         {
-            _adminActions.TransferCase(RequestId,TransferPhysician,TransferDescription);    
+            _adminActions.TransferCase(RequestId, TransferPhysician, TransferDescription);
             return Ok();
         }
         [HttpPost]
@@ -218,6 +219,21 @@ namespace HalloDoc_Project.Controllers
         {
             AdminDashboardViewModel model = _adminTables.GetUnpaidTable();
             return PartialView("UnpaidTable", model);
+        }
+        public IActionResult EncounterForm(int requestId,EncounterFormViewModel EncModel)
+        {
+            EncModel=_encounterForm.EncounterFormGet(requestId);
+            return View(EncModel);
+        }
+        [HttpPost]
+        public IActionResult EncounterForm(EncounterFormViewModel model)
+        {
+            _encounterForm.EncounterFormPost(model.requestId, model);
+            return EncounterForm(model.requestId,model);
+        }
+        public IActionResult AdminProfile(AdminProfileViewModel apvm)
+        {
+            return View();
         }
         public IActionResult DeleteFile(int fileid, int requestid)
         {
@@ -290,7 +306,7 @@ namespace HalloDoc_Project.Controllers
             {
                 var uniqueid = Guid.NewGuid().ToString();
                 var path = _environment.WebRootPath;
-                _fileOperations.insertfilesunique(uploads.File, uniqueid,path);
+                _fileOperations.insertfilesunique(uploads.File, uniqueid, path);
 
                 var filestring = Path.GetFileNameWithoutExtension(uploads.File.FileName);
                 var extensionstring = Path.GetExtension(uploads.File.FileName);
@@ -328,5 +344,6 @@ namespace HalloDoc_Project.Controllers
             var result = _context.Healthprofessionals.Where(u => u.Profession == int.Parse(ProfessionId)).ToList();
             return result;
         }
+
     }
 }

@@ -36,6 +36,8 @@ public partial class ApplicationDbContext : DbContext
 
     public virtual DbSet<Emaillog> Emaillogs { get; set; }
 
+    public virtual DbSet<Encounterform> Encounterforms { get; set; }
+
     public virtual DbSet<Healthprofessional> Healthprofessionals { get; set; }
 
     public virtual DbSet<Healthprofessionaltype> Healthprofessionaltypes { get; set; }
@@ -83,6 +85,8 @@ public partial class ApplicationDbContext : DbContext
     public virtual DbSet<Shiftdetailregion> Shiftdetailregions { get; set; }
 
     public virtual DbSet<Smslog> Smslogs { get; set; }
+
+    public virtual DbSet<Status> Statuses { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
 
@@ -157,6 +161,17 @@ public partial class ApplicationDbContext : DbContext
             entity.HasKey(e => e.Emaillogid).HasName("emaillog_pkey");
 
             entity.HasOne(d => d.Admin).WithMany(p => p.Emaillogs).HasConstraintName("emaillog_adminid_fkey");
+        });
+
+        modelBuilder.Entity<Encounterform>(entity =>
+        {
+            entity.HasKey(e => e.Encounterformid).HasName("encounterform_pkey");
+
+            entity.HasOne(d => d.Admin).WithMany(p => p.Encounterforms).HasConstraintName("encounterform_adminid_fkey");
+
+            entity.HasOne(d => d.Physician).WithMany(p => p.Encounterforms).HasConstraintName("encounterform_physicianid_fkey");
+
+            entity.HasOne(d => d.Request).WithMany(p => p.Encounterforms).HasConstraintName("encounterform_requestid_fkey");
         });
 
         modelBuilder.Entity<Healthprofessional>(entity =>
@@ -396,6 +411,13 @@ public partial class ApplicationDbContext : DbContext
         modelBuilder.Entity<Smslog>(entity =>
         {
             entity.HasKey(e => e.Smslogid).HasName("smslog_pkey");
+        });
+
+        modelBuilder.Entity<Status>(entity =>
+        {
+            entity.HasKey(e => e.StatusId).HasName("status_pkey");
+
+            entity.Property(e => e.StatusId).ValueGeneratedNever();
         });
 
         modelBuilder.Entity<User>(entity =>

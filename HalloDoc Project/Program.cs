@@ -22,7 +22,7 @@ builder.Services.AddScoped<IAgreement, AgreementRepo>();
 builder.Services.AddScoped<IAdminTables,AdminTablesRepo>();
 builder.Services.AddScoped<IAdminActions, AdminActionsRepo>();
 builder.Services.AddScoped<IPatientDashboard,PatientDashboardRepo>();
-
+builder.Services.AddScoped<IEncounterForm, EncounterFormRepo>();
 //For Creating a session
 builder.Services.AddSession(options =>
 {

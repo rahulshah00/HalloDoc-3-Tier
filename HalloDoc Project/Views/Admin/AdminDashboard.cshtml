@@ -655,6 +655,7 @@
                 }
             });
         });
+
         $('#clear-modal-submit-btn').on('click', function (e) {
             e.preventDefault();
             console.log('cancel cancel cancel');
@@ -671,9 +672,7 @@
                     alert('Error Cancelling Request')
                 },
             });
-
         });
-
 
         $('#status-new-tab').on('click', function () {
             $.ajax({
@@ -728,6 +727,7 @@
                 }
             });
         });
+
         $('#status-toclose-tab').on('click', function () {
             $.ajax({
                 url: '/Admin/ToCloseTable',
@@ -787,17 +787,12 @@
 
         $('#ConfirmCancellationModal').modal('show');
     }
-
     function clearCase(link) {
         var request_id = link.getAttribute("data-requestid");
         document.getElementById('clearCaseId').value = request_id;
 
         $('#ClearCaseModal').modal('show');
     }
-
-
-
-
     function blockCase(link) {
         var request_id = link.getAttribute("data-requestiD");
         document.getElementById('RequestID').value = request_id;
@@ -810,14 +805,12 @@
     function RequestSupport(link) {
         $('#RequestSupportModal').modal('show');
     }
-
     function transferCase(link) {
         var request_id = link.getAttribute("data-requestid");
         document.getElementById('RequestId').value = request_id;
 
         $('#TransferCaseModal').modal('show');
     }
-
     $(".status-tab").click(function () {
         $(this).addClass("active");
         $(this).children("svg").attr('display', 'block');
