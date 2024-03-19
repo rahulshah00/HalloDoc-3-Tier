@@ -13,8 +13,8 @@ namespace DAL.ViewModels
     {
         public string username {  get; set; }
         public string password { get; set; }    
-        public string status {  get; set; }
-        public string role { get; set; }
+        public int statusId {  get; set; }
+        public int roleId { get; set; }
         public string firstname {  get; set; }
         public string lastname { get; set; }
         public string email {  get; set; }
@@ -23,13 +23,13 @@ namespace DAL.ViewModels
         public string address1 {  get; set; }
         public string address2 { get; set; }
         public string city {  get; set; }
-        public string state {  get; set; }
+        public int regionId{  get; set; }
         public string zipcode { get; set; }
         public string billingPhone {  get; set; }
-        public string adminId {  get; set; }
-        List<Region> region { get; set; }
-        List<Status> statuses { get; set; }
-        List<Role> roles { get; set; }
+        public int adminId {  get; set; }
+        public  List<Region> region { get; set; }
+        public List<Status> statuses { get; set; }
+        public List<Role> roles { get; set; }
         
     }
 }

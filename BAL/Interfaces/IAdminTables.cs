@@ -17,6 +17,6 @@ namespace BAL.Interfaces
         public AdminDashboardViewModel GetToCloseTable();
         public AdminDashboardViewModel GetUnpaidTable();
         public AdminDashboardViewModel AdminDashboardView();
-        public AdminDashboardViewModel AdminDashboard();
+        public AdminDashboardViewModel AdminDashboard(string email);
     }
 }

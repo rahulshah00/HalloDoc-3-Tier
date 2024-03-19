@@ -15,9 +15,11 @@ using System.Text;
 using Microsoft.AspNetCore.Http.Features;
 using System.Security.Cryptography.X509Certificates;
 using BAL.Interfaces;
+using Microsoft.AspNetCore.Mvc.Abstractions;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 namespace HalloDoc_Project.Controllers
 {
-
+    [CustomAuthorize("Admin")]
     public class AdminController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -28,7 +30,8 @@ namespace HalloDoc_Project.Controllers
         private readonly IAdminTables _adminTables;
         private readonly IFileOperations _fileOperations;
         private readonly IEncounterForm _encounterForm;
-        public AdminController(ApplicationDbContext context, IWebHostEnvironment environment, IConfiguration config, IEmailService emailService, IAdminTables adminTables, IAdminActions adminActions, IFileOperations fileOperations, IEncounterForm encounterForm)
+        private readonly IAdmin _admin;
+        public AdminController(ApplicationDbContext context, IWebHostEnvironment environment, IConfiguration config, IEmailService emailService, IAdminTables adminTables, IAdminActions adminActions, IFileOperations fileOperations, IEncounterForm encounterForm, IAdmin admin)
         {
             _context = context;
             _environment = environment;
@@ -38,6 +41,7 @@ namespace HalloDoc_Project.Controllers
             _adminTables = adminTables;
             _fileOperations = fileOperations;
             _encounterForm = encounterForm;
+            _admin = admin;
         }
         public IActionResult Index()
         {
@@ -82,6 +86,10 @@ namespace HalloDoc_Project.Controllers
             Admin = 1,
             Patient = 2,
             Physician = 3
+        }
+        public IActionResult Access()
+        {
+            return View();
         }
         //Delete, DeleteAll, ViewUploads, SendOrders(Get) methods are not converted to three tier.
         public IActionResult ViewCase(int requestid)
@@ -150,7 +158,8 @@ namespace HalloDoc_Project.Controllers
         }
         public IActionResult AdminDashboard()
         {
-            AdminDashboardViewModel advm = _adminTables.AdminDashboard();
+            var email = HttpContext.Session.GetString("Email");
+            AdminDashboardViewModel advm = _adminTables.AdminDashboard(email);
             return View(advm);
         }
         [HttpPost]
@@ -220,20 +229,45 @@ namespace HalloDoc_Project.Controllers
             AdminDashboardViewModel model = _adminTables.GetUnpaidTable();
             return PartialView("UnpaidTable", model);
         }
-        public IActionResult EncounterForm(int requestId,EncounterFormViewModel EncModel)
+        public IActionResult EncounterForm(int requestId, EncounterFormViewModel EncModel)
         {
-            EncModel=_encounterForm.EncounterFormGet(requestId);
+            EncModel = _encounterForm.EncounterFormGet(requestId);
             return View(EncModel);
         }
         [HttpPost]
         public IActionResult EncounterForm(EncounterFormViewModel model)
         {
             _encounterForm.EncounterFormPost(model.requestId, model);
-            return EncounterForm(model.requestId,model);
+            return EncounterForm(model.requestId, model);
         }
-        public IActionResult AdminProfile(AdminProfileViewModel apvm)
+        public IActionResult AdminProfile()
         {
-            return View();
+            var email = HttpContext.Session.GetString("Email");
+            AdminProfileViewModel model = new AdminProfileViewModel();
+            if (email != null)
+            {
+                model = _admin.AdminProfileGet(email);
+            }
+            return View("AdminProfile", model);
+        }
+        [HttpPost]
+        public IActionResult AdminInfoPost(AdminProfileViewModel apvm)
+        {
+            _admin.AdminInfoPost(apvm);
+            return AdminProfile();
+        }
+        [HttpPost]
+        public IActionResult BillingInfoPost(AdminProfileViewModel apvm)
+        {
+            _admin.BillingInfoPost(apvm);
+            return AdminProfile();
+        }
+        [HttpPost]
+        public IActionResult PasswordPost(AdminProfileViewModel apvm)
+        {
+            var email = HttpContext.Session.GetString("Email");
+            _admin.PasswordPost(apvm,email);
+            return AdminProfile();
         }
         public IActionResult DeleteFile(int fileid, int requestid)
         {
@@ -280,7 +314,7 @@ namespace HalloDoc_Project.Controllers
         public IActionResult SendMail(int requestid, string path)
         {
             _emailService.SendEmailWithAttachments(requestid, path);
-            return RedirectToAction("ViewUploads", "Admin");
+            return RedirectToAction("ViewUploads", "Admin", new { requestid = requestid });
         }
         [HttpPost]
         public IActionResult SendAgreement(int RequestId, string PhoneNo, string email)
@@ -343,6 +377,11 @@ namespace HalloDoc_Project.Controllers
         {
             var result = _context.Healthprofessionals.Where(u => u.Profession == int.Parse(ProfessionId)).ToList();
             return result;
+        }
+        public IActionResult Logout()
+        {
+            HttpContext.Session.Clear();
+            return RedirectToAction("login_page", "Guest");
         }
 
     }

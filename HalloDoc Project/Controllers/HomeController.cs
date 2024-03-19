@@ -57,10 +57,7 @@ namespace HalloDoc_Project.Controllers
         {
             return View();
         }
-        public IActionResult AdminDashboard()
-        {
-            return View();
-        }
+        
         [HttpPost]
         public JsonResult CheckEmail(string email)
         {

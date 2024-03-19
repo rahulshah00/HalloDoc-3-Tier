@@ -152,12 +152,24 @@ namespace HalloDoc_Project.Controllers
             Aspnetuser v = _context.Aspnetusers.FirstOrDefault(dt => dt.Username == demouser.Username && dt.Passwordhash == password);
             if (v != null)
             {
-                HttpContext.Session.SetString("Email", v.Email);
-                var token = _jwtToken.generateJwtToken(v.Email, "Patient");
-                Response.Cookies.Append("jwt", token);
+                if (v.Role == "Patient")
+                {
+                    HttpContext.Session.SetString("Email", v.Email);
+                    var token = _jwtToken.generateJwtToken(v.Email, "Patient");
+                    Response.Cookies.Append("jwt", token);
 
-                TempData["success"] = "Logged In Successfully";
-                return RedirectToAction("PatientDashboard", "Home");
+                    TempData["success"] = "Logged In Successfully";
+                    return RedirectToAction("PatientDashboard", "Home");
+                }
+                else if(v.Role == "Admin")
+                {
+                    HttpContext.Session.SetString("Email", v.Email);
+                    var token = _jwtToken.generateJwtToken(v.Email, "Admin");
+                    Response.Cookies.Append("jwt", token);
+
+                    TempData["success"] = "Logged In Successfully";
+                    return RedirectToAction("AdminDashboard", "Admin");
+                }                
             }
             return View();
         }

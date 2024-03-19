@@ -23,6 +23,8 @@ builder.Services.AddScoped<IAdminTables,AdminTablesRepo>();
 builder.Services.AddScoped<IAdminActions, AdminActionsRepo>();
 builder.Services.AddScoped<IPatientDashboard,PatientDashboardRepo>();
 builder.Services.AddScoped<IEncounterForm, EncounterFormRepo>();
+builder.Services.AddScoped<IAdmin,AdminRepo>();
+
 //For Creating a session
 builder.Services.AddSession(options =>
 {

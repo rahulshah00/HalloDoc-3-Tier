@@ -192,13 +192,14 @@ namespace BAL.Repository
             return model;
         }
 
-        AdminDashboardViewModel IAdminTables.AdminDashboard()
+        AdminDashboardViewModel IAdminTables.AdminDashboard(string email)
         {
             List<Physician> physician = _context.Physicians.ToList();
             List<Region> regions = _context.Regions.ToList();
             List<Casetag> casetags = _context.Casetags.ToList();
 
-            AdminRequestsViewModel arvm = new AdminRequestsViewModel();
+            var admin = _context.Admins.FirstOrDefault(a => a.Email == email);
+
             AdminDashboardViewModel advm = new()
             {
                 physician = physician,
@@ -210,7 +211,7 @@ namespace BAL.Repository
                 conclude = _context.Requests.Count(u => u.Status == 6),
                 toclose = _context.Requests.Count(u => u.Status == 7 || u.Status == 3 || u.Status == 8),
                 unpaid = _context.Requests.Count(u => u.Status == 9),
-                Username = arvm.Name
+                Username = admin.Firstname + " " + admin.Lastname
             };
             return advm;
         }
