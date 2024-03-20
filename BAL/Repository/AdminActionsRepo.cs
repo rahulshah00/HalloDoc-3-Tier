@@ -33,7 +33,6 @@ namespace BAL.Repository
         {
             _context = context;
         }
-
         public ViewCaseViewModel ViewCaseAction(int requestid)
         {
             Requestclient rc = _context.Requestclients.FirstOrDefault(x => x.Requestid == requestid);
@@ -50,7 +49,6 @@ namespace BAL.Repository
             };
             return vc;
         }
-
         public void AssignCaseAction(int RequestId, string AssignPhysician, string AssignDescription)
         {
             var user = _context.Requests.FirstOrDefault(h => h.Requestid == RequestId);
@@ -125,15 +123,16 @@ namespace BAL.Repository
                 blockRequest.Reason = blocknotes ?? "--";
             }
         }
-        public void TransferCase(int RequestId, string TransferPhysician, string TransferDescription)
+        public void TransferCase(int RequestId, string TransferPhysician, string TransferDescription, int adminid)
         {
             var req = _context.Requests.FirstOrDefault(h => h.Requestid == RequestId);
             if (req != null)
             {
+
                 req.Status = 2;
                 req.Modifieddate = DateTime.Now;
                 req.Physicianid = int.Parse(TransferPhysician);
-
+                
                 _context.Update(req);
                 _context.SaveChanges();
 
@@ -143,7 +142,9 @@ namespace BAL.Repository
                 requeststatuslog.Notes = TransferDescription;
                 requeststatuslog.Createddate = DateTime.Now;
                 requeststatuslog.Status = 2;
-
+                requeststatuslog.Transtophysicianid = int.Parse(TransferPhysician);
+                requeststatuslog.Adminid = adminid;
+                
                 _context.Add(requeststatuslog);
                 _context.SaveChanges();
             }
@@ -154,10 +155,7 @@ namespace BAL.Repository
             try
             {
                 Request req = _context.Requests.FirstOrDefault(req => req.Requestid == requestid);
-
                 req.Modifieddate = DateTime.Now;
-
-
 
                 Requeststatuslog reqStatusLog = new Requeststatuslog()
                 {
@@ -185,7 +183,6 @@ namespace BAL.Repository
                 return false;
             }
         }
-
         void IAdminActions.SendOrderAction(int requestid, SendOrderViewModel sendOrder)
         {
             Orderdetail Order = new()
@@ -200,6 +197,37 @@ namespace BAL.Repository
                 Vendorid = 1
             };
             _context.Add(Order);
+            _context.SaveChanges();
+        }
+
+        public CloseCaseViewModel CloseCaseGet(int requestid)
+        {
+            var files = _context.Requestwisefiles.Where(x => x.Requestid == requestid).ToList();
+            var user = _context.Requestclients.FirstOrDefault(x => x.Requestid == requestid);
+            //string dob = user.Intyear + "-" + user.Strmonth.ToString() + "-" + user.Intdate;
+            CloseCaseViewModel model = new()
+            {
+                firstname = user.Firstname,
+                lastname = user.Lastname,
+                //dateofbirth = DateTime.Parse(dob),
+                phoneno = user.Phonenumber,
+                email = user.Email,
+                RequestwisefileList = files,
+                requestid = requestid,
+            };
+            return model;
+        }
+
+        public void CloseCasePost(CloseCaseViewModel model, int requestid)
+        {
+            var user = _context.Requestclients.FirstOrDefault(r => r.Requestid == requestid);
+
+            user.Firstname = model.firstname;
+            user.Lastname = model.lastname;
+            user.Phonenumber = model.phoneno;
+            user.Email = model.email;
+
+            _context.Update(user);
             _context.SaveChanges();
         }
     }

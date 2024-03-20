@@ -21,6 +21,8 @@ namespace DAL.ViewModels
         public List<Physician> physician { get; set; }
         public List<Region> regions { get; set; }
         public int requestid {  get; set; }
+        public int physicianid {  get; set; }
+        public int regionid {  get; set; }
         
     }
 }

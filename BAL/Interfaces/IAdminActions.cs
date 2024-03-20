@@ -16,8 +16,10 @@ namespace BAL.Interfaces
         public void AssignCaseAction(int RequestId, string AssignPhysician, string AssignDescription);
         public void CancelCaseAction(int requestid, string Reason, string Description);
         public void BlockCaseAction(int requestid, string blocknotes);
-        public void TransferCase(int RequestId, string TransferPhysician, string TransferDescription);
+        public void TransferCase(int RequestId, string TransferPhysician, string TransferDescription,int adminid);
         public bool ClearCaseModal(int requestid);
         public void SendOrderAction(int requestid, SendOrderViewModel sendOrder);
+        public CloseCaseViewModel CloseCaseGet(int requestid);
+        public void CloseCasePost(CloseCaseViewModel model,int requestid);
     }
 }

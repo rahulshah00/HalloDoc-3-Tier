@@ -426,7 +426,7 @@
                     <small class="text-muted">To assign this request, search and select new Physician.</small>
 
                     <div class="form-floating my-2">
-                        <select class="form-select" id="selectregion" aria-label="Floating label select example">
+                        <select class="form-select" asp-for="regionid" id="selectregion" aria-label="Floating label select example">
                             <option selected>Select</option>
                             @for (int i = 0; i < Model.regions.Count; i++)
                             {
@@ -436,7 +436,7 @@
                         <label for="floatingSelect">Narrow Search By Region</label>
                     </div>
 
-                    <select class="form-select" id="selectphysiciantransfer" name="TransferPhysician" aria-label="Default select example">
+                    <select class="form-select" asp-for="physicianid" id="selectphysiciantransfer" aria-label="Default select example">
                         <option selected disabled>Select Physician</option>
                         @for (int i = 0; i < Model.physician.Count; i++)
                         {

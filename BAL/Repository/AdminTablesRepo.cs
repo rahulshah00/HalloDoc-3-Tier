@@ -38,7 +38,7 @@ namespace BAL.Repository
             AdminDashboardViewModel advm = new()
             {
                 adminRequests = adminRequests,
-                Username = arvm.Name
+                Username = arvm.Name,
             };
             return advm;
         }
@@ -83,12 +83,10 @@ namespace BAL.Repository
                                      physicianName = "Dr.XYZ",
                                      servicedate = DateOnly.Parse("22-12-2022"),
                                      email = rc.Email
-
                                  }
                                ).Where(x => x.status == 6).ToList();
             AdminDashboardViewModel model = new AdminDashboardViewModel()
             {
-
                 adminRequests = adminRequests,
             };
             return model;
@@ -109,7 +107,6 @@ namespace BAL.Repository
                                      requestType = r.Requesttypeid,
                                      status = r.Status
                                  }).Where(x => x.status == 1).ToList();
-
             AdminDashboardViewModel model = new AdminDashboardViewModel()
             {
                 adminRequests = adminRequests,
@@ -133,12 +130,9 @@ namespace BAL.Repository
                                      physicianName = "Dr.XYZ",
                                      servicedate = DateOnly.Parse("22-12-2022"),
                                      email = rc.Email
-                                 }
-                                            ).Where(x => x.status == 2).ToList();
-
+                                 }).Where(x => x.status == 2).ToList();
             AdminDashboardViewModel model = new AdminDashboardViewModel()
             {
-
                 adminRequests = adminRequests,
             };
             return model;
@@ -160,7 +154,6 @@ namespace BAL.Repository
                                      physicianName = "Dr.XYZ",
                                      servicedate = DateOnly.Parse("22-12-2022"),
                                      email = rc.Email
-
                                  }).Where(x => x.status == 3 || x.status == 7 || x.status == 8).ToList();
             AdminDashboardViewModel model = new AdminDashboardViewModel()
             {
@@ -174,6 +167,7 @@ namespace BAL.Repository
                                  join rc in _context.Requestclients on r.Requestid equals rc.Requestid
                                  select new AdminRequestsViewModel
                                  {
+                                     requestid = r.Requestid,
                                      Name = rc.Firstname + " " + rc.Lastname,
                                      Requestor = r.Firstname,
                                      PhoneNo = rc.Phonenumber,

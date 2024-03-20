@@ -2,21 +2,9 @@
 using DAL.DataModels;
 using Microsoft.AspNetCore.Mvc;
 using DAL.DataContext;
-using System.Net.Mail;
-using System.Net;
-using System.Reflection.Metadata;
-using System.IO;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc.Filters;
-using System.IdentityModel.Tokens.Jwt;
-using Microsoft.IdentityModel.Tokens;
-using System.Security.Claims;
 using System.Text;
-using Microsoft.AspNetCore.Http.Features;
-using System.Security.Cryptography.X509Certificates;
 using BAL.Interfaces;
-using Microsoft.AspNetCore.Mvc.Abstractions;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
+
 namespace HalloDoc_Project.Controllers
 {
     [CustomAuthorize("Admin")]
@@ -183,7 +171,9 @@ namespace HalloDoc_Project.Controllers
         [HttpPost]
         public IActionResult TransferCase(int RequestId, string TransferPhysician, string TransferDescription)
         {
-            _adminActions.TransferCase(RequestId, TransferPhysician, TransferDescription);
+            var email = HttpContext.Session.GetString("Email");
+            var admin = _context.Admins.FirstOrDefault(x => x.Email == email);
+            _adminActions.TransferCase(RequestId, TransferPhysician, TransferDescription, admin.Adminid);
             return Ok();
         }
         [HttpPost]
@@ -266,7 +256,7 @@ namespace HalloDoc_Project.Controllers
         public IActionResult PasswordPost(AdminProfileViewModel apvm)
         {
             var email = HttpContext.Session.GetString("Email");
-            _admin.PasswordPost(apvm,email);
+            _admin.PasswordPost(apvm, email);
             return AdminProfile();
         }
         public IActionResult DeleteFile(int fileid, int requestid)
@@ -354,6 +344,25 @@ namespace HalloDoc_Project.Controllers
                 _context.SaveChanges();
             }
             return RedirectToAction("ViewUploads", new { requestid = uploads.RequestID });
+        }
+        public IActionResult CloseCase(int requestid)
+        {
+            CloseCaseViewModel model=_adminActions.CloseCaseGet(requestid);
+            return View(model);
+        }
+        [HttpPost]
+        public IActionResult CloseCase(CloseCaseViewModel model, int requestid)
+        {
+            _adminActions.CloseCasePost(model, requestid);
+            return CloseCase(requestid);
+        }
+        public IActionResult CloseInstance(int reqid)
+        {
+            var user = _context.Requests.FirstOrDefault(x => x.Requestid == reqid);
+            user.Status = 9;
+            _context.Update(user);
+            _context.SaveChanges();
+            return RedirectToAction("AdminDashboard", "Admin");
         }
         public IActionResult SendOrders(int requestid)
         {
